@@ -5,6 +5,8 @@ Both the sequential and parralele versions will be detailed in
 order to asses the performances
 ***************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 
 
@@ -14,6 +16,7 @@ order to asses the performances
 void merged_path_seq(int **A,int **B, int **M,int a, int b);
 __global__ void merged_path_par(int **A,int **B, int **M);
 __global__ void mergedSmall_k(int **A,int **B, int **M);
+__global__ void mergeSmallBatch_k(int **A,int **B, int **M);
 __device__ void pathBig_k(int **A,int **B, int **M);
 __device__ void pathBig_k(int **A,int **B, int **M);
 
