@@ -3,7 +3,7 @@ GPU project on CUDA
 
 # to do:
 
- - [x] automatic documentation?
+ - [ ] automatic documentation?
  - [ ] sequentail
  - [ ] parallel
 
