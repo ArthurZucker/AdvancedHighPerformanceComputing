@@ -1,9 +1,9 @@
 CC = nvcc
 SRC = $(wildcard *.cu)
 OBJ = $(SRC:.cu=.o)
-EXEC = mergepath
-
-
+EXEC = main
+LIBFLAGS = -g 
+CCFLAGS = -rdc=true
 all : $(EXEC)
 
 $(EXEC) : $(OBJ)
