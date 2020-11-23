@@ -1,0 +1,129 @@
+\documentclass{beamerperso}
+% \usetikzlibrary{external}
+% \tikzexternalize[prefix=tikz/]
+\input{File/graph}
+% --------------------------------------------------- %
+%                  Presentation info	              %
+% --------------------------------------------------- %
+\title[HPCA]{Project GPU : Path merge}
+\subtitle{}
+\author[MAIN5--Path merge]{
+Arthur \textbf{Zucker} ,
+Clément  \textbf{Apavou}}
+\institute[Polytech Sorbonne]{
+\begin{figure}[!h]
+    \minipage{0.5\textwidth}
+    \centering
+     \includegraphics[width=0.7\linewidth]{image/polytech_sorbonne.jpg}
+    \endminipage
+    \minipage{0.5\textwidth}
+    \centering
+     \includegraphics[width=0.7\linewidth]{image/SU_SCIENCES-removebg-preview.png}
+    \endminipage
+\end{figure}
+}
+
+\subject{ClusTi} % metadata
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\titlepage
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%% Table of contents %%%%%%%%%%%%%%% 
+\begin{frame}{Table des matières}
+\setcounter{tocdepth}{1}
+\tableofcontents    
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\begin{frame}{Introduction}
+\begin{block}{Keywords}
+    CUDA · Stream · Merging
+\end{block}
+\begin{itemize}
+    \item We have to finish the code
+    \item  Then work on the report
+    \item Finally work on the beamer 
+\end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Path merged : thread 0}
+    \setbeamercovered{invisible}
+\RaggedRight
+\begin{tikzpicture}[line cap=round,scale=0.6, every node/.style={transform shape}]
+    \baseGraph
+    \draw (10,6) node[shape = circle,label=right:\Huge{Calcul de P et K :},fill=green!40,scale=2] {1}; \pause
+    \draw (13,5) node {\Huge{$\rightarrow$ P=(0,0)}};\pause
+    \draw (13,4) node {\Huge{$\rightarrow$ K=(0,0)}};\pause
+    \draw (10,3) node[shape = circle,label=right:\Huge{offset = 0},fill=green!40,scale=2] {2}; \pause
+    \draw (10,1.5) node[shape = circle,label=right:\Huge{Q = (0,0)},fill=green!40,scale=2] {3}; 
+    \draw  (-3,6) node[label=right:\Huge{Q=P=K}] {\BlackCirc};\pause
+    \draw (10,0) node[shape = circle,label=right:\Huge{A[$Q_{y}$]<B[$Q_{x}$]},fill=green!40,scale=2] {4};\pause 
+    \draw (10,-1.5) node[shape = circle,label=right:\Huge{M[i]=A[$Q_{y}$]},fill=green!40,scale=2] {5}; 
+    %\draw (-3,6) node {\BlueRoute}; \pause
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Path merged : thread 0,path}
+    \setbeamercovered{invisible}
+\RaggedRight
+\begin{tikzpicture}[line cap=round,scale=0.6, every node/.style={transform shape}]
+    \baseGraph
+    \draw (-3,6) node {\BlueRoute}; \pause
+    \maze (-3,6) node {\BlueRoute}--(-3,5)node {\BlueRoute};
+\end{tikzpicture}
+\end{frame}
+\input{Chapters/01Thread1.tex}
+\input{Chapters/02Thread2.tex}
+\begin{frame}{Skipping to thread 9}
+    \setbeamercovered{invisible}
+\RaggedRight
+\begin{tikzpicture}[line cap=round,scale=0.6, every node/.style={transform shape}]
+    \baseGraph
+    \draw (-3,6) node {\BlueRoute}; 
+    \maze (-3,6) node {\BlueRoute}--(-3,5)node {\BlueRoute};
+    \maze (-3,5) node {\BlueRoute}--(-3,4)node {\BlueRoute};
+    \maze (-3,4) node {\BlueRoute}--(-2,4)node {\BlueRoute};
+    \maze (-2,4) node {\BlueRoute}--(-2,3)node {\BlueRoute};\pause
+    \maze (-2,3) node {\BlueRoute}--(-2,2)node {\BlueRoute};\pause
+    \maze (-2,2) node {\BlueRoute}--(-2,1)node {\BlueRoute};\pause
+    \maze (-2,1) node {\BlueRoute}--(-1,1) node {\BlueRoute};
+    \maze (-1,1) node {\BlueRoute}--(0,1) node {\BlueRoute};
+    \maze (0,1)  node {\BlueRoute}--(0,0) node {\BlueRoute};\pause
+\end{tikzpicture}
+\end{frame}
+
+\input{Chapters/03Thread9.tex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{frame}{Path merged : thread 0}
+%     \setbeamercovered{invisible}
+% \begin{center}
+% \begin{tikzpicture}[line cap=round,scale=0.6, every node/.style={transform shape}]
+%     \baseGraph
+%     \draw (-3,6) node {\BlueRoute}; \pause
+%     \maze (-3,6) node {\BlueRoute}--(-3,4)node {\BlueRoute};\pause
+%     \maze (-3,4) node {\BlueRoute}--(-2,4)node {\BlueRoute};\pause
+%     \maze (-2,4) node {\BlueRoute}--(-2,1)node {\BlueRoute};\pause
+%     \maze (-2,1) node {\BlueRoute}--(0,1) node {\BlueRoute};\pause
+%     \maze (0,1)  node {\BlueRoute}--(0,0) node {\BlueRoute};\pause
+%     \maze (0,0)  node {\BlueRoute}--(1,0) node {\BlueRoute};\pause
+%     \maze (1,0)  node {\BlueRoute}--(1,-1)node {\BlueRoute};\pause
+%     \maze (1,-1) node {\BlueRoute}--(4,-1)node {\BlueRoute};\pause
+%     \maze (4,-1) node {\BlueRoute}--(4,-3)node {\BlueRoute};\pause
+    
+    
+% \end{tikzpicture}
+% \end{center}
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
