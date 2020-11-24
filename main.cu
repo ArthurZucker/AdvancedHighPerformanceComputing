@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <string>  
+#include <string>
 #include <iostream>
 #include <algorithm>
 #include <iterator>
@@ -17,12 +17,12 @@ texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
 
 /*
-TO DO : 
- - implement using ldg  avec restricted__  et int4 qui contient 4 int, read only memory 
+TO DO :
+ - implement using ldg  avec restricted__  et int4 qui contient 4 int, read only memory
      const int* __restrict__  A
  - mergeBig_k
  - pathBig_k
- 
+
 */
 int main(int argc, char* argv[]) {
     cudaDeviceReset();
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 	cudaSetDevice(0);
     testCUDA(cudaSetDeviceFlags(cudaDeviceMapHost));
     //____________________________________________
-    
+
     //___________ Variable declaration ___________
     int sizeA,sizeB;
     if (argc < 3) {sizeA = rand()%1024;sizeB = rand()%(1024-sizeA);} // If no arguments are provided, set random sizes
@@ -55,37 +55,37 @@ int main(int argc, char* argv[]) {
     B[0]=rand()%20;
     for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
     for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
-    
+
     //___________ TO DO: explain texture memory ___________
     testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
     testCUDA(cudaMalloc((void **)&thostB,sizeB*sizeof(int)));
-    
+
     testCUDA(cudaMemcpy(thostA, A, sizeA*sizeof(int), cudaMemcpyHostToDevice));
     testCUDA(cudaMemcpy(thostB, B, sizeB*sizeof(int), cudaMemcpyHostToDevice));
-    
+
     testCUDA (cudaBindTexture(0,texture_referenceA, thostA,sizeA*sizeof(int)));
     testCUDA (cudaBindTexture(0,texture_referenceB, thostB,sizeB*sizeof(int)));
     //____________________________________________
     // zero copy
     testCUDA(cudaHostAlloc(&hostA,sizeA*sizeof(int),cudaHostAllocMapped));
     testCUDA(cudaHostAlloc(&hostB,sizeB*sizeof(int),cudaHostAllocMapped));
-    
+
     testCUDA(cudaHostGetDevicePointer((void **)&pA, (void *) hostA,0));
     testCUDA(cudaHostGetDevicePointer((void **)&pB, (void *) hostB,0));
     hostA[0]=rand()%20;
     hostB[0]=rand()%20;
     for(int i=1;i<sizeA;i++){hostA[i]=hostA[i-1]+rand()%20+1;}
     for(int i=1;i<sizeB;i++){hostB[i]=hostB[i-1]+rand()%20+1;}
-    
-    // WC memory can be transferred across the PCI Express bus more quickly on some system configurations, but cannot be read 
-    // efficiently by most CPUs. WC memory is a good option for buffers that will be written by the CPU and read by the device 
+
+    // WC memory can be transferred across the PCI Express bus more quickly on some system configurations, but cannot be read
+    // efficiently by most CPUs. WC memory is a good option for buffers that will be written by the CPU and read by the device
     // via mapped pinned memory or host->device transfers.
-    
+
     testCUDA(cudaHostAlloc(&hostM,sizeM*sizeof(int),cudaHostAllocMapped)); // in order to do zero copy
     testCUDA(cudaHostGetDevicePointer((void **)&pM, (void *) hostM,0));
     /*cudaHostGetDevicePointer	((void **)&pA,(void *)hostA,0);
-    cudaHostGetDevicePointer	((void **)&pB,(void *)hostB,0);	
-    cudaHostGetDevicePointer	((void **)&pM,(void *)hostM,0);	
+    cudaHostGetDevicePointer	((void **)&pB,(void *)hostB,0);
+    cudaHostGetDevicePointer	((void **)&pM,(void *)hostM,0);
     Thought it could solve on previous architecture... did not -arch=sm_35
     */
     //_______________ Sequential _________________
@@ -97,40 +97,40 @@ int main(int argc, char* argv[]) {
     printf("elapsed time : %f ms\n",time_spent);
     cout<<"Check sorted : "<<is_sorted(seqM,sizeM)<<endl;
     //____________________________________________
-    
-   
+
+
     //___________ call kernels ___________________
     cudaEvent_t start, stop;
     testCUDA(cudaEventCreate(&start));
-	testCUDA(cudaEventCreate(&stop));
+	  testCUDA(cudaEventCreate(&stop));
     float TimeVar=0;
     //____________________________________________
-    
+
     //___________ Shared _________________________
     printf("________________ Shared ___________________\n");
     testCUDA(cudaEventRecord(start));
-    mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
-    //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
+    mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
+    //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop));
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl; 
+    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
-    
+
     //____________________________________________
-    
+
     //___________ texture ________________________
     printf("________________ Texture ___________________\n");
     testCUDA(cudaEventRecord(start,0));
-    mergedSmall_k_texture<<<1,1024>>>(hostM,sizeA,sizeB,sizeM); 
+    mergedSmall_k_texture<<<1,1024>>>(hostM,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
     testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl; 
-    
+    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
+
     //____________________________________________
-    
+
     //___________ zerocopy _______________________
     printf("_______________ zero copy ___________________\n");
     testCUDA(cudaEventRecord(start,0));
@@ -140,75 +140,75 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-    
+
     //____________________________________________
-    
+
     //___________ LDG ____________________________
     printf("_____________________ LDG ___________________\n");
     testCUDA(cudaEventRecord(start,0));
     mergedSmall_k_ldg<<<1,1024>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
-	testCUDA(cudaEventSynchronize(stop));
+	  testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
-    
-    //___________ MergeBig _______________________
-    printf("__________________ Path big noraml __________________\n");
-    testCUDA(cudaEventRecord(start,0));
-    int *__restrict__ path;
-    //testCUDA(cudaMalloc((void **)&path,sizeM*sizeof(bool)));
-    testCUDA(cudaHostAlloc((void **)&path,sizeA*sizeof(int),cudaHostAllocMapped));
-    //merged_Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    //pathBig_k<<<1,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    //pathBig_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    testCUDA(cudaEventRecord(stop,0));
-	testCUDA(cudaEventSynchronize(stop));
-    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    printf("elapsed time : %f ms\n",TimeVar);
+
+  //   //___________ MergeBig _______________________
+  //   printf("__________________ Path big noraml __________________\n");
+  //   testCUDA(cudaEventRecord(start,0));
+  //   int *__restrict__ path;
+  //   //testCUDA(cudaMalloc((void **)&path,sizeM*sizeof(bool)));
+  //   testCUDA(cudaHostAlloc((void **)&path,sizeA*sizeof(int),cudaHostAllocMapped));
+  //   //merged_Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+  //   //pathBig_k<<<1,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+  //   //pathBig_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+  //   testCUDA(cudaEventRecord(stop,0));
+	// testCUDA(cudaEventSynchronize(stop));
+  //   testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+  //   printf("elapsed time : %f ms\n",TimeVar);
+  //   //____________________________________________
+  //
+  //   //___________ Path Big _______________________
+  //   printf("__________________ Merg big normal _________________\n");
+  //   testCUDA(cudaEventRecord(start,0));
+  //   //Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+  //   //merged_Big_k<<<1,1024>>>(hostA,hostB,hostM,path,sizeM);
+  //   //merged_Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
+  //   testCUDA(cudaEventRecord(stop,0));
+	// testCUDA(cudaEventSynchronize(stop));
+  //   testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+  //   printf("elapsed time : %f ms\n",TimeVar);
+  //   cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
+  //   //____________________________________________
+  //
+  //
+  //    //___________ MergeBig _______________________
+  //   printf("__________________ Path big ldg __________________\n");
+  //   testCUDA(cudaEventRecord(start,0));
+  //   //pathBig_k_ldg<<<1,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+  //   //pathBig_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+  //   testCUDA(cudaEventRecord(stop,0));
+	// testCUDA(cudaEventSynchronize(stop));
+  //   testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+  //   printf("elapsed time : %f ms\n",TimeVar);
+  //   //____________________________________________
+  //
+  //   //___________ Path Big _______________________
+  //   printf("__________________ Merg big ldg _________________\n");
+  //   testCUDA(cudaEventRecord(start,0));
+  //   //Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+  //   //merged_Big_k_ldg<<<1,1024>>>(hostA,hostB,hostM,path,sizeM);
+  //   //merged_Big_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
+  //   testCUDA(cudaEventRecord(stop,0));
+	// testCUDA(cudaEventSynchronize(stop));
+  //   testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+  //   printf("elapsed time : %f ms\n",TimeVar);
+  //   cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
-    
-    //___________ Path Big _______________________
-    printf("__________________ Merg big normal _________________\n");
-    testCUDA(cudaEventRecord(start,0));
-    //Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    //merged_Big_k<<<1,1024>>>(hostA,hostB,hostM,path,sizeM);
-    //merged_Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
-    testCUDA(cudaEventRecord(stop,0));
-	testCUDA(cudaEventSynchronize(stop));
-    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    printf("elapsed time : %f ms\n",TimeVar);
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-    //____________________________________________
-    
-    
-     //___________ MergeBig _______________________
-    printf("__________________ Path big ldg __________________\n");
-    testCUDA(cudaEventRecord(start,0));
-    //pathBig_k_ldg<<<1,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    //pathBig_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    testCUDA(cudaEventRecord(stop,0));
-	testCUDA(cudaEventSynchronize(stop));
-    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    printf("elapsed time : %f ms\n",TimeVar);
-    //____________________________________________
-    
-    //___________ Path Big _______________________
-    printf("__________________ Merg big ldg _________________\n");
-    testCUDA(cudaEventRecord(start,0));
-    //Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    //merged_Big_k_ldg<<<1,1024>>>(hostA,hostB,hostM,path,sizeM);
-    //merged_Big_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
-    testCUDA(cudaEventRecord(stop,0));
-	testCUDA(cudaEventSynchronize(stop));
-    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    printf("elapsed time : %f ms\n",TimeVar);
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-    //____________________________________________
-    
-    
-    
+
+
+
     //___________ Cleaning up ____________________
     testCUDA(cudaUnbindTexture ( texture_referenceA ));
     testCUDA(cudaUnbindTexture ( texture_referenceB ));
@@ -220,10 +220,10 @@ int main(int argc, char* argv[]) {
     free(B);
     testCUDA(cudaFreeHost(hostA));
     testCUDA(cudaFreeHost(hostB));
-	testCUDA(cudaEventDestroy(start));
-	testCUDA(cudaEventDestroy(stop));
+	  testCUDA(cudaEventDestroy(start));
+	  testCUDA(cudaEventDestroy(stop));
     testCUDA(cudaFreeHost(hostM));
     //____________________________________________
-    
+
 	return 0;
 }
