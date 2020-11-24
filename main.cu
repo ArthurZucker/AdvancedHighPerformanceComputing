@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
     int sizeM = sizeA+sizeB;
     printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-    int *hostA,*thostA,*hostB,*thostB,*hostM,*pA,*pB,*pM;
+    int *hostA,*thostA,*hostB,*thostB,*hostM;
     int *seqM = (int *) malloc(sizeM*sizeof(int));
     int *A = (int *) malloc(sizeA*sizeof(int));
     int *B = (int *) malloc(sizeB*sizeof(int));
@@ -67,11 +67,8 @@ int main(int argc, char* argv[]) {
     testCUDA (cudaBindTexture(0,texture_referenceB, thostB,sizeB*sizeof(int)));
     //____________________________________________
     // zero copy
-    testCUDA(cudaHostAlloc(&hostA,sizeA*sizeof(int),cudaHostAllocMapped));
-    testCUDA(cudaHostAlloc(&hostB,sizeB*sizeof(int),cudaHostAllocMapped));
-
-    testCUDA(cudaHostGetDevicePointer((void **)&pA, (void *) hostA,0));
-    testCUDA(cudaHostGetDevicePointer((void **)&pB, (void *) hostB,0));
+    testCUDA(cudaHostAlloc(&hostA,sizeA*sizeof(int),cudaHostAllocWriteCombined));
+    testCUDA(cudaHostAlloc(&hostB,sizeB*sizeof(int),cudaHostAllocWriteCombined));
     hostA[0]=rand()%20;
     hostB[0]=rand()%20;
     for(int i=1;i<sizeA;i++){hostA[i]=hostA[i-1]+rand()%20+1;}
@@ -82,11 +79,9 @@ int main(int argc, char* argv[]) {
     // via mapped pinned memory or host->device transfers.
 
     testCUDA(cudaHostAlloc(&hostM,sizeM*sizeof(int),cudaHostAllocMapped)); // in order to do zero copy
-    testCUDA(cudaHostGetDevicePointer((void **)&pM, (void *) hostM,0));
-    /*cudaHostGetDevicePointer	((void **)&pA,(void *)hostA,0);
-    cudaHostGetDevicePointer	((void **)&pB,(void *)hostB,0);
-    cudaHostGetDevicePointer	((void **)&pM,(void *)hostM,0);
-    Thought it could solve on previous architecture... did not -arch=sm_35
+    /*testCUDA(cudaHostGetDevicePointer((void **)&pM, (void *) hostM,0));
+    testCUDA(cudaHostGetDevicePointer((void **)&pA, (void *) hostA,0));
+    testCUDA(cudaHostGetDevicePointer((void **)&pB, (void *) hostB,0));
     */
     //_______________ Sequential _________________
     printf("_______________ Sequential _________________\n");
