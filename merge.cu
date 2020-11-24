@@ -54,19 +54,15 @@ __global__ void mergeSmall_k_shared(const int *__restrict__ A,const int *__restr
         while(1){
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
-            int AQy_1;
-            int AQy   = shared[Q.y];
-            int BQx_1 = shared[sA+Q.x-1];
-            int BQx   ;
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || AQy > BQx_1)){
-                AQy_1 = shared[Q.y-1];
-                BQx   = shared[sA+Q.x];
-                if(Q.x==sB || Q.y==0 || AQy_1<=BQx){
-                   if(Q.y < sA && (Q.x == sB || AQy<=BQx)){
-                        M[i] = AQy;
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || shared[Q.y] > shared[sA+Q.x-1])){
+                //AQy_1 = shared[Q.y-1];
+                //BQx   = shared[sA+Q.x];
+                if(Q.x==sB || Q.y==0 || shared[Q.y-1]<=shared[sA+Q.x]){
+                   if(Q.y < sA && (Q.x == sB || shared[Q.y]<=shared[sA+Q.x])){
+                        M[i] = shared[Q.y];
                    }
                    else{
-                        M[i] = BQx;
+                        M[i] = shared[sA+Q.x];
                    }
                    break;
                 }
@@ -96,17 +92,16 @@ __global__ void mergedSmall_k_texture(int *__restrict__ M,const int sA, const in
         while(1){
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
-            int AQy_1 = tex1Dfetch( texture_referenceA, (Q.y-1));
-            int AQy   = tex1Dfetch( texture_referenceA, Q.y);
-            int BQx_1 = tex1Dfetch( texture_referenceB, (Q.x-1));
-            int BQx   = tex1Dfetch( texture_referenceB, Q.x);
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || AQy > BQx_1)){
-                if(Q.x==sB || Q.y==0 || AQy_1<=BQx){
-                   if(Q.y < sA && (Q.x == sB || AQy<=BQx)){
-                        M[i] = AQy;
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || 
+            tex1Dfetch( texture_referenceA, Q.y    ) > 
+            tex1Dfetch( texture_referenceB, Q.x-1  )))
+            {
+                if(Q.x==sB || Q.y==0 || tex1Dfetch( texture_referenceA, (Q.y-1))<=tex1Dfetch( texture_referenceB, Q.x)){
+                   if(Q.y < sA && (Q.x == sB || tex1Dfetch( texture_referenceA, Q.y)<=tex1Dfetch( texture_referenceB, Q.x))){
+                        M[i] = tex1Dfetch( texture_referenceA, Q.y);
                    }
                    else{
-                        M[i] = BQx;
+                        M[i] = tex1Dfetch( texture_referenceB, Q.x);
                    }
                    break;
                 }
@@ -136,17 +131,13 @@ __global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restric
         while(1){
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
-            int AQy_1 = __ldg(&A[Q.y-1]);
-            int AQy   = __ldg(&A[Q.y]);
-            int BQx_1 = __ldg(&B[Q.x-1]);
-            int BQx   = __ldg(&B[Q.x]);
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || AQy > BQx_1)){
-                if(Q.x==sB || Q.y==0 || AQy_1<=BQx){
-                   if(Q.y < sA && (Q.x == sB || AQy<=BQx)){
-                        M[i] = AQy;
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || __ldg(&A[Q.y]) > __ldg(&B[Q.x-1]))){
+                if(Q.x==sB || Q.y==0 || __ldg(&A[Q.y-1])<=__ldg(&B[Q.x])){
+                   if(Q.y < sA && (Q.x == sB || __ldg(&A[Q.y])<=__ldg(&B[Q.x]))){
+                        M[i] = __ldg(&A[Q.y]);
                    }
                    else{
-                        M[i] = BQx;
+                        M[i] = __ldg(&B[Q.x]);
                    }
                    break;
                 }
@@ -179,17 +170,13 @@ __global__ void mergedSmall_k_ldg2(const int *__restrict__ A,const int *__restri
             // int2 could load Qy1 and Qy but does not work here... illegal acces
             int2 AQ = __ldg((int2 *) &A[Q.y-1]);
             int2 BQ = __ldg((int2 *) &B[Q.x-1]);
-            int AQy_1 = AQ.x;
-            int AQy   = AQ.y;
-            int BQx_1 = BQ.x;
-            int BQx   = BQ.y;
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || AQy > BQx_1)){
-                if(Q.x==sB || Q.y==0 || AQy_1<=BQx){
-                   if(Q.y < sA && (Q.x == sB || AQy<=BQx)){
-                        M[i] = AQy;
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
+                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
+                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
+                        M[i] = A[Q.y];
                    }
                    else{
-                        M[i] = BQx;
+                        M[i] = B[Q.x];
                    }
                    break;
                 }
@@ -219,17 +206,13 @@ __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ 
         while(1){
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
-            int AQy_1 = A[Q.y-1];
-            int AQy   = A[Q.y];
-            int BQx_1 = B[Q.x-1];
-            int BQx   = B[Q.x];
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || AQy > BQx_1)){
-                if(Q.x==sB || Q.y==0 || AQy_1<=BQx){
-                   if(Q.y < sA && (Q.x == sB || AQy<=BQx)){
-                        M[i] = AQy;
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
+                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
+                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
+                        M[i] = A[Q.y];
                    }
                    else{
-                        M[i] = BQx;
+                        M[i] = B[Q.x];
                    }
                    break;
                 }

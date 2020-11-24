@@ -109,8 +109,8 @@ int main(int argc, char* argv[]) {
     //___________ Shared _________________________
     printf("________________ Shared ___________________\n");
     testCUDA(cudaEventRecord(start));
-    //mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
-    mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
+    mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
+    //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
     testCUDA(cudaEventRecord(stop));
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl; 
     testCUDA(cudaEventSynchronize(stop));
@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaHostAlloc((void **)&path,sizeA*sizeof(int),cudaHostAllocMapped));
     //merged_Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
     //pathBig_k<<<1,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    pathBig_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+    //pathBig_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventRecord(start,0));
     //Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
     //merged_Big_k<<<1,1024>>>(hostA,hostB,hostM,path,sizeM);
-    merged_Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
+    //merged_Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
     printf("__________________ Path big ldg __________________\n");
     testCUDA(cudaEventRecord(start,0));
     //pathBig_k_ldg<<<1,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    pathBig_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+    //pathBig_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventRecord(start,0));
     //Big_k<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
     //merged_Big_k_ldg<<<1,1024>>>(hostA,hostB,hostM,path,sizeM);
-    merged_Big_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
+    //merged_Big_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
