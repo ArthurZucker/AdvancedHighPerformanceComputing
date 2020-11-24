@@ -25,6 +25,7 @@ TO DO :
  
 */
 int main(int argc, char* argv[]) {
+    cudaDeviceReset();
     //___________ Basic initialisation ___________
 	srand((unsigned int)time(NULL));
 	int nDevices;
@@ -46,7 +47,7 @@ int main(int argc, char* argv[]) {
     else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
     int sizeM = sizeA+sizeB;
     printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-    int *hostA,*thostA,*hostB,*thostB,*hostM;
+    int *hostA,*thostA,*hostB,*thostB,*hostM,*pA,*pB,*pM;
     int *seqM = (int *) malloc(sizeM*sizeof(int));
     int *A = (int *) malloc(sizeA*sizeof(int));
     int *B = (int *) malloc(sizeB*sizeof(int));
@@ -66,8 +67,11 @@ int main(int argc, char* argv[]) {
     testCUDA (cudaBindTexture(0,texture_referenceB, thostB,sizeB*sizeof(int)));
     //____________________________________________
     // zero copy
-    testCUDA(cudaHostAlloc(&hostA,sizeA*sizeof(int),cudaHostAllocWriteCombined));
-    testCUDA(cudaHostAlloc(&hostB,sizeB*sizeof(int),cudaHostAllocWriteCombined));
+    testCUDA(cudaHostAlloc(&hostA,sizeA*sizeof(int),cudaHostAllocMapped));
+    testCUDA(cudaHostAlloc(&hostB,sizeB*sizeof(int),cudaHostAllocMapped));
+    
+    testCUDA(cudaHostGetDevicePointer((void **)&pA, (void *) hostA,0));
+    testCUDA(cudaHostGetDevicePointer((void **)&pB, (void *) hostB,0));
     hostA[0]=rand()%20;
     hostB[0]=rand()%20;
     for(int i=1;i<sizeA;i++){hostA[i]=hostA[i-1]+rand()%20+1;}
@@ -78,7 +82,7 @@ int main(int argc, char* argv[]) {
     // via mapped pinned memory or host->device transfers.
     
     testCUDA(cudaHostAlloc(&hostM,sizeM*sizeof(int),cudaHostAllocMapped)); // in order to do zero copy
-    
+    testCUDA(cudaHostGetDevicePointer((void **)&pM, (void *) hostM,0));
     /*cudaHostGetDevicePointer	((void **)&pA,(void *)hostA,0);
     cudaHostGetDevicePointer	((void **)&pB,(void *)hostB,0);	
     cudaHostGetDevicePointer	((void **)&pM,(void *)hostM,0);	
@@ -99,7 +103,20 @@ int main(int argc, char* argv[]) {
     cudaEvent_t start, stop;
     testCUDA(cudaEventCreate(&start));
 	testCUDA(cudaEventCreate(&stop));
-    float TimeVar;
+    float TimeVar=0;
+    //____________________________________________
+    
+    //___________ Shared _________________________
+    printf("________________ Shared ___________________\n");
+    testCUDA(cudaEventRecord(start));
+    //mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
+    mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM); 
+    testCUDA(cudaEventRecord(stop));
+    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl; 
+    testCUDA(cudaEventSynchronize(stop));
+    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    printf("elapsed time : %f ms\n",TimeVar);
+    
     //____________________________________________
     
     //___________ texture ________________________

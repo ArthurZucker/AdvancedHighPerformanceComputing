@@ -31,9 +31,57 @@ void merged_path_seq(const int *__restrict__ A,const int *__restrict__ B, int *_
 			j++;}
 	}      
 }
+
+
+__global__ void mergeSmall_k_shared(const int *__restrict__ A,const int *__restrict__ B, int *M,const int sA, const int sB, const int sM){
+    extern __shared__ int shared[];
+    //__shared__ int shared[1024];
+    int i = threadIdx.x;
+    if(i<sM){
+        if (0<=i && i<sA)shared[i] = A[i];
+        else if (sA<=i && i<sM)shared[i] = B[i-sA];
+        __syncthreads();
+        int2 K;
+        int2 P;
+        if(i>sA){
+            K = {i-sA,sA};
+            P = {sA,i-sA};
+        }
+        else{
+            K = {0,i};
+            P = {i,0};
+        }
+        while(1){
+            int offset = int(abs(K.y-P.y)/2);
+            int2 Q = {K.x+offset,K.y-offset};
+            int AQy_1;
+            int AQy   = shared[Q.y];
+            int BQx_1 = shared[sA+Q.x-1];
+            int BQx   ;
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || AQy > BQx_1)){
+                AQy_1 = shared[Q.y-1];
+                BQx   = shared[sA+Q.x];
+                if(Q.x==sB || Q.y==0 || AQy_1<=BQx){
+                   if(Q.y < sA && (Q.x == sB || AQy<=BQx)){
+                        M[i] = AQy;
+                   }
+                   else{
+                        M[i] = BQx;
+                   }
+                   break;
+                }
+                else{
+                   K = {Q.x+1,Q.y-1};
+                }
+            }
+            else{
+                P = {Q.x-1,Q.y+1};
+            }
+        }
+    }
+}
 __global__ void mergedSmall_k_texture(int *__restrict__ M,const int sA, const int sB, const int sM){
     int i = threadIdx.x;
-    //printf("");
     if(i<sM){
         int2 K;
         int2 P;
