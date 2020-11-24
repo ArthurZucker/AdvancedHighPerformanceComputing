@@ -1,16 +1,16 @@
 CC = nvcc
 SRC = $(wildcard *.cu)
 OBJ = $(SRC:.cu=.o)
-EXEC = main
-LIBFLAGS = -g 
-CCFLAGS = -rdc=true
+EXEC = main 
+LIBFLAGS = -g -pg -Xptxas=-v -arch=sm_35
+CCFLAGS = -rdc=true -arch=sm_35
 all : $(EXEC)
 
 $(EXEC) : $(OBJ)
 	$(CC) $(LIBFLAGS) $^ -o $@  
     
 %.o : %.cu
-	$(CC) $(CCFLAGS) -o $@ -c $<
+	$(CC) $(CCFLAGS) -c $< -o $@ 
     
 .depend :
 	@gcc -MM $(SRC) > .depend

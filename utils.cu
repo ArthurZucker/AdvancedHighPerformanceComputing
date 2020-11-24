@@ -16,7 +16,7 @@ void testCUDA(cudaError_t error, const char *file, int line)  {
        exit(EXIT_FAILURE);
 	} 
 }
-int is_sorted(int *seqM,int sizeM){
+int is_sorted(const int *seqM,const int sizeM){
     for(int i=0;i<sizeM-1;i++){
         if(seqM[i+1]<seqM[i])return 0;
     }
@@ -24,7 +24,7 @@ int is_sorted(int *seqM,int sizeM){
     
 }
 
-void print_t(int *seqM,int sizeM){
+void print_t(const int *seqM,const int sizeM){
     cout<<"[";
     for (int i = 0; i <sizeM-1; i++) 
         cout << seqM[i] << ',';

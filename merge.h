@@ -2,9 +2,14 @@
 #define MERGE_h
 extern texture <int> texture_referenceA ;
 extern texture <int> texture_referenceB ;
-void merged_path_seq                 (int *A,int *B, int *M,int a, int b);
-__global__ void mergedSmall_k_texture(int *A,int a, int b, int m);
-__global__ void mergedSmall_k        (int *A,int *B, int *M,int a, int b, int m);
-__global__ void merged_Big_k  (int *A,int *B, int *M,int a, int b, int m);
-__global__ void pathBig_k        (int *A,int *B, int *M,int a, int b, int m);
+extern __device__ bool *__restrict__ path;
+__global__ void mergedSmall_k_texture(int * __restrict__ A,const int a, int b, const int m);
+__global__ void mergedSmall_k_ldg2   (const int *__restrict__ A,const int *__restrict__ B, int *M,const int a, const int b, const int m);
+__global__ void mergedSmall_k_ldg    (const int *__restrict__ A,const int *__restrict__ B, int *M,const int a, const int b, const int m);
+__global__ void mergedSmall_k        (const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b, const int m);
+__global__ void   pathBig_k      (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path ,const int a, const int b, const int m);
+__global__ void merged_Big_k            (const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,int *__restrict__ path,const int m);
+void merged_path_seq                 (const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b);
+__global__ void    merged_Big_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m);
+__global__ void pathBig_k_ldg (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM);
 #endif
