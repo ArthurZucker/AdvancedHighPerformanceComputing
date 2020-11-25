@@ -4,8 +4,16 @@ GPU project on CUDA
 # to do:
 
  - [ ] automatic documentation?
- - [ ] sequentail
- - [ ] parallel
+ - [x] sequential
+	- [x] test sequential
+	- [x] eval time
+ - [ ] Question 1 to shared
+ - [ ] Question 2
+ - [ ] Question 3
+ - [ ] Question 4
+ - [ ] Question 5
+ - [ ] `__ldg()`to increase perf
+ - [ ] Add Offset to the beamer + thread 11 I think (showed in exemple)
 
 
 
