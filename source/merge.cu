@@ -115,6 +115,7 @@ __global__ void mergedSmall_k_texture(int *__restrict__ M,const int sA, const in
             }
         }
     }
+<<<<<<< HEAD
 }
 // used ldg
 __global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
@@ -195,6 +196,11 @@ __global__ void mergedSmall_k_ldg2(const int *__restrict__ A,const int *__restri
 }
 // zerocopy
 __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int sA, const int sB, const int sM){
+=======
+}
+// used ldg
+__global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
+>>>>>>> c5257fbd78b92a9d6259f9f65849ff49ca15c56c
     int i = threadIdx.x;
     if(i<sM){
         int2 K;
@@ -210,6 +216,7 @@ __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ 
         while(1){
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
+<<<<<<< HEAD
             if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
                 if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
                    if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
@@ -217,6 +224,15 @@ __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ 
                    }
                    else{
                         M[i] = B[Q.x];
+=======
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || __ldg(&A[Q.y]) > __ldg(&B[Q.x-1]))){
+                if(Q.x==sB || Q.y==0 || __ldg(&A[Q.y-1])<=__ldg(&B[Q.x])){
+                   if(Q.y < sA && (Q.x == sB || __ldg(&A[Q.y])<=__ldg(&B[Q.x]))){
+                        M[i] = __ldg(&A[Q.y]);
+                   }
+                   else{
+                        M[i] = __ldg(&B[Q.x]);
+>>>>>>> c5257fbd78b92a9d6259f9f65849ff49ca15c56c
                    }
                    break;
                 }
