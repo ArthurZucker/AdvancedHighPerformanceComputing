@@ -36,6 +36,10 @@ int main(int argc, char* argv[]) {
 		printf("Max Grid size: %dx%d\n",  prop.maxGridSize[1], prop.maxGridSize[2]);
 		printf("Max Thread Dim: %d,%d,%d\n", prop.maxThreadsDim[0], prop.maxThreadsDim[1], prop.maxThreadsDim[2]);
 		printf("Max Thread per blocks: %d\n", prop.maxThreadsPerBlock);
+        printf("Max number of threads per multiprocessor : %d\n",prop.maxThreadsPerMultiProcessor);
+        printf("Number of multiprocessors on device : %d\n",prop.multiProcessorCount);
+        printf("Amount of Shared mem available for int : %d\n",prop.sharedMemPerMultiprocessor/sizeof(int));
+        
 	}
 	cudaSetDevice(0);
     testCUDA(cudaSetDeviceFlags(cudaDeviceMapHost));
@@ -194,26 +198,31 @@ int main(int argc, char* argv[]) {
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
     
-    
+    // if |M| >> 163 840 (nb max of threads running at the same time?
+    // then, we divide |M|into |M|/163 840 = offset. Each threads takes diag i*offset!
+    // Else, if |M|<163 840, then we can use the same amount of threads? Split in diagonals?
+    // Thus the dimension of the grid will differ based on the index
+    dim3 block_dim(1,1,1);
+    dim3 grid_dim(163840,1,1);
      //___________ MergeBig _______________________
-    /*printf("__________________ Path big sans shared + ldg __________________\n");
+    printf("__________________ Path big sans shared + ldg __________________\n");
     testCUDA(cudaEventRecord(start,0));
-    //pathBig_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    testCUDA(cudaEventRecord(stop,0));
-	testCUDA(cudaEventSynchronize(stop));
-    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    printf("elapsed time : %f ms\n",TimeVar);*/
-    //____________________________________________
-  
-    //___________ Path Big _______________________
-    /*printf("__________________ Merg big sans shared + ldg _________________\n");
-    testCUDA(cudaEventRecord(start,0));
-    merged_Big_k_ldg<<<(sizeM+1023)/1024,1024>>>(hostA,hostB,hostM,path,sizeM);
+    pathBig_k<<<grid_dim,block_dim>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;*/
+    //____________________________________________
+  
+    //___________ Path Big _______________________
+    printf("__________________ Merg big sans shared + ldg _________________\n");
+    testCUDA(cudaEventRecord(start,0));
+    merged_Big_k<<<163840,1>>>(hostA,hostB,hostM,path,sizeM);
+    testCUDA(cudaEventRecord(stop,0));
+	testCUDA(cudaEventSynchronize(stop));
+    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    printf("elapsed time : %f ms\n",TimeVar);
+    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
 
 

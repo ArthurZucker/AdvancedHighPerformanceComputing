@@ -238,18 +238,20 @@ __global__ void pathBig_k_naive (const int *__restrict__ A,const int *__restrict
 
 __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
     int i = blockDim.x*blockIdx.x + threadIdx.x;
-    int index = i*(sA=sB)/(sizeM+1023)/1024;
+    int nb_thread_max=163840;
+    int index = i*(sA+sB)/nb_thread_max;
+    print(index);
     int a_top = index>sA? sA:index;
     int b_top = index>sA? index-sA:0;
     int a_bottom = b_top;
     while(1){
         int offset = (a_top-a_bottom)/2;
         int ai = a_top - offset;
-        int bi = b_top + offser;
+        int bi = b_top + offset;
         if (A[ai]>B[bi-1]){
             if(A[ai-1]<=B[bi]){
                 path[i]    = ai;
-                path[sA+i] = bi;
+                path[sA+i] = bi; // here we should try using contigus memory space : A[i] = path[2i], B[i] = path[2i+1]
                 break;
             }
             else{
@@ -264,7 +266,11 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
 }
 
 __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
-    
+    // retrieve path[i] and path[i+1] and path[i+2], path[i+3] => use __ldg() for int4!! 
+    //           ai            bi          ai+1         bi+1
+    //          ( entring point)          (exit point) for the subarrays
+    // if load in shared, then each thread will load 1 element from A[path[i]] to A[path[i+2]] 
+    // and  B[path[i+1]] to B[path[i+3]]
 
 }
 
