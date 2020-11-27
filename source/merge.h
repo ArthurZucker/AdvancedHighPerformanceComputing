@@ -9,11 +9,11 @@ __global__ void mergedSmall_k_texture(int * __restrict__ A,const int a, int b, c
 __global__ void mergedSmall_k_ldg2   (const int *__restrict__ A,const int *__restrict__ B, int *M,const int a, const int b, const int m);
 __global__ void mergedSmall_k_ldg    (const int *__restrict__ A,const int *__restrict__ B, int *M,const int a, const int b, const int m);
 __global__ void mergedSmall_k        (const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b, const int m);
-__global__ void   pathBig_k          (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path ,const int a, const int b, const int m);
-__global__ void merged_Big_k         (const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,int *__restrict__ path,const int m);
+__global__ void   pathBig_k_naive          (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path ,const int a, const int b, const int m);
+__global__ void merged_Big_k_naive         (const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,int *__restrict__ path,const int m);
 void merged_path_seq                 (const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b);
-__global__ void    merged_Big_k_ldg  (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m);
-__global__ void pathBig_k_ldg        (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM);
+__global__ void    merged_Big_k_naive_ldg  (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m);
+__global__ void pathBig_k_naive_ldg        (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM);
 
 __global__ void mergeSmall_k_shared  (const int *__restrict__ A,const int *__restrict__ B, int *M,const int a, const int b, const int m);
 
