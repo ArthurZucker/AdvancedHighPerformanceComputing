@@ -236,48 +236,36 @@ __global__ void pathBig_k_naive (const int *__restrict__ A,const int *__restrict
     }
 }
 
-__global__ void pathBig_k_shared (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
-    extern __shared__ int shared[];
+__global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
     int i = blockDim.x*blockIdx.x + threadIdx.x;
-    
-    if (0<=i && i<sA)shared[i] = A[i];          // threads <|A| load A[i] in shared memory 
-        else if (sA<=i && i<sM)shared[i] = B[i-sA]; // threads >|A| but <|M| load B[i] in shared memory 
-        // offset required, to get i == sM, i-sA = sB last index of shared and B 
-        __syncthreads();
-    
-    if(i<sM){
-        int2 K;
-        int2 P;
-        if(i>sA){
-            K = {i-sA,sA};
-            P = {sA,i-sA};
-        }
-        else{
-            K = {0,i};
-            P = {i,0};
-        }
-        while(1){
-            int offset = int(abs(K.y-P.y)/2);
-            int2 Q = {K.x+offset,K.y-offset};
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
-                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
-                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
-                        path[i] = -Q.y; // 0 means I take A
-                   }
-                   else{
-                        path[i] = Q.x; // 1 means I take B
-                   }
-                   break;
-                }
-                else{
-                   K = {Q.x+1,Q.y-1};
-                }
+    int index = i*(sA=sB)/(sizeM+1023)/1024;
+    int a_top = index>sA? sA:index;
+    int b_top = index>sA? index-sA:0;
+    int a_bottom = b_top;
+    while(1){
+        int offset = (a_top-a_bottom)/2;
+        int ai = a_top - offset;
+        int bi = b_top + offser;
+        if (A[ai]>B[bi-1]){
+            if(A[ai-1]<=B[bi]){
+                path[i]    = ai;
+                path[sA+i] = bi;
+                break;
             }
             else{
-                P = {Q.x-1,Q.y+1};
+                a_top = ai-1;
+                b_top = bi+1;
             }
         }
+        else{
+            a_bottom = ai+1;
+        }
     }
+}
+
+__global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
+    
+
 }
 
 

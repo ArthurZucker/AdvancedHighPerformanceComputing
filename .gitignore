@@ -6,3 +6,7 @@ main
 *.cubin
 *.fatbin
 *.o
+*.out
+*.tar
+*.data
+
