@@ -8,6 +8,7 @@
 #include <iterator>
 #include <assert.h>
 #include <time.h>
+
 using namespace std;
 void testCUDA(cudaError_t error, const char *file, int line)  {
 	if (error != cudaSuccess) {
@@ -17,12 +18,17 @@ void testCUDA(cudaError_t error, const char *file, int line)  {
 	} 
 }
 int is_sorted(const int *seqM,const int sizeM){
+    int sorted =1;
     for(int i=0;i<sizeM-1;i++){
-        if(seqM[i+1]<seqM[i])return 0;
+        if(seqM[i+1]<seqM[i]){
+            printf("\n\terror index : %d ",i);
+            sorted =  0;
+        }
     }
-     return 1;
+    return sorted;
     
 }
+
 
 void print_t(const int *seqM,const int sizeM){
     cout<<"[";

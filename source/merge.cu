@@ -14,7 +14,29 @@ order to asses the performances
 #include <assert.h>
 #include <time.h>
 #include "merge.h"
+#define VERBOSE 0
 using namespace std;
+// modified at home 
+__device__ void merged_path_seq_device(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b){
+	int m = a+b;
+	int i = 0;
+	int j = 0;
+	while(i+j<m){
+		if(i>=a){
+			M[i+j]=B[j];
+            j++;
+        }
+		else if(j>=b ||A[i]<B[j]){
+			M[i+j]=A[i];
+            i++;
+        }
+		else{
+			M[i+j]=B[j];
+            j++;
+        }
+	}
+}
+
 void merged_path_seq(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b){
 	int m = a+b;
 	int i = 0;
@@ -199,29 +221,35 @@ __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ 
     }
 }
 
-__global__ void pathBig_k_naive (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
+__device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
+    // each block will launch this one 
+    // try window of 64 + shared memory 
     int i = blockDim.x*blockIdx.x + threadIdx.x;
+    int ri = threadIdx.x;
     if(i<sM){
         int2 K;
         int2 P;
         if(i>sA){
-            K = {i-sA,sA};
+            K = {i-sA,sA}; // same sA
             P = {sA,i-sA};
         }
         else{
-            K = {0,i};
+            K = {0,i};  // 0 replace with Q.y (entry point) 
             P = {i,0};
         }
         while(1){
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
-                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
-                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
-                        path[i] = -Q.y; // 0 means I take A
+            // __ldg intrinsic and const __restrict__ garanties the compiler that it is read only
+            // thus no aliasing is done 
+            // modifier le borne n haut a gauche en bas a droite point d'entrée et de sortie 
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || __ldg(&A[Q.y]) > __ldg(&B[Q.x-1]))){
+                if(Q.x==sB || Q.y==0 || __ldg(&A[Q.y-1])<=__ldg(&B[Q.x])){
+                   if(Q.y < sA && (Q.x == sB || __ldg(&A[Q.y])<=__ldg(&B[Q.x]))){
+                        M[i] = __ldg(&A[Q.y]);
                    }
                    else{
-                        path[i] = Q.x; // 1 means I take B
+                        M[i] = __ldg(&B[Q.x]);
                    }
                    break;
                 }
@@ -236,33 +264,59 @@ __global__ void pathBig_k_naive (const int *__restrict__ A,const int *__restrict
     }
 }
 
+// all thread will do a simple diagonal search
+__global__ void pathBig_k_naive (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
+    
+}
+
 __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
+    // try blocks of 32-64 thread to load in shared only on give the result
     int i = blockDim.x*blockIdx.x + threadIdx.x;
-    int nb_thread_max=163840;
-    int index = i*(sA+sB)/nb_thread_max;
-    print(index);
-    int a_top = index>sA? sA:index;
-    int b_top = index>sA? index-sA:0;
-    int a_bottom = b_top;
-    while(1){
-        int offset = (a_top-a_bottom)/2;
-        int ai = a_top - offset;
-        int bi = b_top + offset;
-        if (A[ai]>B[bi-1]){
-            if(A[ai-1]<=B[bi]){
-                path[i]    = ai;
-                path[sA+i] = bi; // here we should try using contigus memory space : A[i] = path[2i], B[i] = path[2i+1]
-                break;
-            }
-            else{
-                a_top = ai-1;
-                b_top = bi+1;
-            }
+    int nb_thread_max=gridDim.x;
+    if(sM>nb_thread_max){
+        i = (i*int(((sA+sB)/nb_thread_max)));
+    }
+    #if VERBOSE == 1
+    printf("thread %4d taking care of diagonal %d\n",blockDim.x*blockIdx.x + threadIdx.x,i);
+    #endif
+    if(i==0){
+        path[2*nb_thread_max]   = sA;
+        path[2*nb_thread_max+1] = sB;
+    }
+    if(i<sM){
+        int2 K;
+        int2 P;
+        if(i>sA){
+            K = {i-sA,sA};
+            P = {sA,i-sA};
         }
         else{
-            a_bottom = ai+1;
+            K = {0,i};
+            P = {i,0};
+        }
+    i = blockDim.x*blockIdx.x + threadIdx.x;
+    while(1){
+            int offset = int(abs(K.y-P.y)/2);
+            int2 Q = {K.x+offset,K.y-offset};
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
+                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
+                    #if VERBOSE == 1
+                    printf("Entry point found (%d,%d)\n",Q.y,Q.x);
+                    #endif
+                    path[2*i]   = Q.y; 
+                    path[2*i+1] = Q.x; 
+                   break;
+                }
+                else{
+                   K = {Q.x+1,Q.y-1};
+                }
+            }
+            else{
+                P = {Q.x-1,Q.y+1};
+            }
         }
     }
+   
 }
 
 __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
@@ -271,64 +325,43 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
     //          ( entring point)          (exit point) for the subarrays
     // if load in shared, then each thread will load 1 element from A[path[i]] to A[path[i+2]] 
     // and  B[path[i+1]] to B[path[i+3]]
+    // int4 = reinterpret_cast<int24*>(&path[i])
+    // here use sequential merge on each subarrays
+    int i = blockDim.x*blockIdx.x + threadIdx.x;
+    int tm=gridDim.x;
+    if(i == 0){
+        #if VERBOSE == 1
+        printf("thread %6.d, has to work on \tA[%6d]->A[%6d]\tB[%6d]->B[%6d]\tM[%6.d]\n",blockDim.x*blockIdx.x + threadIdx.x,path[2*(tm-1)],path[2*tm],path[2*(tm-1)+1],path[2*tm+1],((tm-1)*int(((m)/tm))));
+        #endif
+        //merged_path_seq_device(&A[path[2*(tm-1)]],&B[path[2*(tm-1)+1]], &M[  ((tm-1)*int(((m)/tm))) ],path[2*tm]-path[2*(tm-1)], path[2*tm+1]-path[2*(tm-1)+1]);
+        merged_k_ldg(&A[path[2*(tm-1)]],&B[path[2*(tm-1)+1]], &M[  ((tm-1)*int(((m)/tm))) ],path[2*tm]-path[2*(tm-1)], path[2*tm+1]-path[2*(tm-1)+1], int(((m)/tm)) );//path[2*tm]-path[2*(tm-1)] + path[2*tm+1]-path[2*(tm-1)+1] );
+    
 
+    }
+    else if(i<m){
+        #if VERBOSE == 1
+        printf("thread %6.d, has to work on \tA[%6d]->A[%6d]\tB[%6d]->B[%6d]\tM[%6.d]\n",blockDim.x*blockIdx.x + threadIdx.x,path[2*(i-1)],path[2*i],path[2*(i-1)+1],path[2*i+1],((i-1)*int((m/tm))) );
+        #endif
+        //merged_path_seq_device(&A[path[2*(i-1)]],&B[path[2*(i-1)+1]], &M[  ((i-1)*int((m/tm)))  ],path[2*i]-path[2*(i-1)], path[2*i+1]-path[2*(i-1)+1]);
+        merged_k_ldg(&A[path[2*(i-1)]],&B[path[2*(i-1)+1]], &M[  ((i-1)*int((m/tm)))  ],path[2*i]-path[2*(i-1)], path[2*i+1]-path[2*(i-1)+1], path[2*i]-path[2*(i-1)]+path[2*i+1]-path[2*(i-1)+1]);
+    
+    }
+    
+    
 }
 
 
 __global__ void pathBig_k_naive_ldg (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
-    int i = blockDim.x*blockIdx.x + threadIdx.x;
-    if(i<sM){
-        int2 K;
-        int2 P;
-        if(i>sA){
-            K = {i-sA,sA};
-            P = {sA,i-sA};
-        }
-        else{
-            K = {0,i};
-            P = {i,0};
-        }
-        while(1){
-            int offset = int(abs(K.y-P.y)/2);
-            int2 Q = {K.x+offset,K.y-offset};
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || __ldg(&A[Q.y]) > __ldg(&B[Q.x-1]))){
-                if(Q.x==sB || Q.y==0 || __ldg(&A[Q.y-1])<=__ldg(&B[Q.x])){
-                // return Qx and Qy instantly
-                   if(Q.y < sA && (Q.x == sB || __ldg(&A[Q.y])<=__ldg(&B[Q.x]))){
-                        path[i] = -Q.y; // 0 means I take A
-                   }
-                   else{
-                        path[i] = Q.x;  // 1 means I take B
-                   }
-                   break;
-                }
-                else{
-                   K = {Q.x+1,Q.y-1};
-                }
-            }
-            else{
-                P = {Q.x-1,Q.y+1};
-            }
-        }
-    }
+    
 }
 
 __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
+    // each thread will use sequentiel merge on his path
+    // it is slow because of the requests mad to the server
     int i = blockDim.x*blockIdx.x + threadIdx.x;
-    if(i<m){
-    int p = path[i];
-     M[i] = p>0? B[p] : A[-p]; // if path[i] == 1 then M[i] = B[i]
-    }
+    merged_path_seq_device(&A[path[2*i]],&B[path[2*i+1]], &M[i],path[2*i+2]-path[2*i], path[2*i+3]-path[2*i]);
 
 }
 
-__global__ void    merged_Big_k_naive_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
-    
-    int i = blockDim.x*blockIdx.x + threadIdx.x;
-    if(i<m){
-    int p = __ldg(&path[i]);
-    M[i] = p>0? __ldg(&B[p]) : __ldg(&A[-p]); // if path[i] == 1 then M[i] = B[i]
-    }
 
-}
 
