@@ -333,8 +333,8 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
         #if VERBOSE == 1
         printf("thread %6.d, has to work on \tA[%6d]->A[%6d]\tB[%6d]->B[%6d]\tM[%6.d]\n",blockDim.x*blockIdx.x + threadIdx.x,path[2*(tm-1)],path[2*tm],path[2*(tm-1)+1],path[2*tm+1],((tm-1)*int(((m)/tm))));
         #endif
-        //merged_path_seq_device(&A[path[2*(tm-1)]],&B[path[2*(tm-1)+1]], &M[  ((tm-1)*int(((m)/tm))) ],path[2*tm]-path[2*(tm-1)], path[2*tm+1]-path[2*(tm-1)+1]);
-        merged_k_ldg(&A[path[2*(tm-1)]],&B[path[2*(tm-1)+1]], &M[  ((tm-1)*int(((m)/tm))) ],path[2*tm]-path[2*(tm-1)], path[2*tm+1]-path[2*(tm-1)+1], int(((m)/tm)) );//path[2*tm]-path[2*(tm-1)] + path[2*tm+1]-path[2*(tm-1)+1] );
+        merged_path_seq_device(&A[path[2*(tm-1)]],&B[path[2*(tm-1)+1]], &M[  ((tm-1)*int(((m)/tm))) ],path[2*tm]-path[2*(tm-1)], path[2*tm+1]-path[2*(tm-1)+1]);
+        //merged_k_ldg(&A[path[2*(tm-1)]],&B[path[2*(tm-1)+1]], &M[  ((tm-1)*int(((m)/tm))) ],path[2*tm]-path[2*(tm-1)], path[2*tm+1]-path[2*(tm-1)+1], int(((m)/tm)) );//path[2*tm]-path[2*(tm-1)] + path[2*tm+1]-path[2*(tm-1)+1] );
     
 
     }
@@ -342,8 +342,8 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
         #if VERBOSE == 1
         printf("thread %6.d, has to work on \tA[%6d]->A[%6d]\tB[%6d]->B[%6d]\tM[%6.d]\n",blockDim.x*blockIdx.x + threadIdx.x,path[2*(i-1)],path[2*i],path[2*(i-1)+1],path[2*i+1],((i-1)*int((m/tm))) );
         #endif
-        //merged_path_seq_device(&A[path[2*(i-1)]],&B[path[2*(i-1)+1]], &M[  ((i-1)*int((m/tm)))  ],path[2*i]-path[2*(i-1)], path[2*i+1]-path[2*(i-1)+1]);
-        merged_k_ldg(&A[path[2*(i-1)]],&B[path[2*(i-1)+1]], &M[  ((i-1)*int((m/tm)))  ],path[2*i]-path[2*(i-1)], path[2*i+1]-path[2*(i-1)+1], path[2*i]-path[2*(i-1)]+path[2*i+1]-path[2*(i-1)+1]);
+        merged_path_seq_device(&A[path[2*(i-1)]],&B[path[2*(i-1)+1]], &M[  ((i-1)*int((m/tm)))  ],path[2*i]-path[2*(i-1)], path[2*i+1]-path[2*(i-1)+1]);
+        //merged_k_ldg(&A[path[2*(i-1)]],&B[path[2*(i-1)+1]], &M[  ((i-1)*int((m/tm)))  ],path[2*i]-path[2*(i-1)], path[2*i+1]-path[2*(i-1)+1], path[2*i]-path[2*(i-1)]+path[2*i+1]-path[2*(i-1)+1]);
     
     }
     
