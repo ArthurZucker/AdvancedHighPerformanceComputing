@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         printf("Max running threads : %d\n",prop.maxThreadsPerMultiProcessor*prop.multiProcessorCount);
         Tmax = prop.maxThreadsPerMultiProcessor*prop.multiProcessorCount;
 	}
-    Tmax =1024;
+    //Tmax =1024;
 	cudaSetDevice(0);
     testCUDA(cudaSetDeviceFlags(cudaDeviceMapHost));
     //____________________________________________
@@ -161,9 +161,12 @@ int main(int argc, char* argv[]) {
     printf("__________________ Path big normal __________________\n");
     testCUDA(cudaEventRecord(start,0));
     int *__restrict__ path;
-    int nb_threads = 163840;
+    
+    int nb_threads = (sizeM+1023)/1024;
+    if(sizeM<1024) nb_threads=1024;
+
     testCUDA(cudaMalloc((void **)&path,sizeM*sizeof(int)));
-    pathBig_k<<<nb_threads,1>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+    pathBig_k<<<nb_threads,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -173,7 +176,7 @@ int main(int argc, char* argv[]) {
     //___________ Path Big _______________________
     printf("__________________ Merg big normal _________________\n");
     testCUDA(cudaEventRecord(start,0));
-    merged_Big_k<<<nb_threads,1>>>(hostA,hostB,hostM,path,sizeM);
+    merged_Big_k<<<nb_threads,1024>>>(hostA,hostB,hostM,path,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));

@@ -21,7 +21,7 @@ int is_sorted(const int *seqM,const int sizeM){
     int sorted =1;
     for(int i=0;i<sizeM-1;i++){
         if(seqM[i+1]<seqM[i]){
-            printf("\n\terror index : %d ",i);
+            printf("\n\terror index : %d, value = %d, next value = %d",i,seqM[i],seqM[i+1]);
             sorted =  0;
         }
     }
