@@ -9,13 +9,13 @@
 #include <time.h>
 #include "batch_merge.h"
 
-__global__ void mergeSmallBatch_k(int **__restrict__ A,int **__restrict__ B,int **__restrict__ M,int *sA, int *sB, int sM){
+__global__ void mergeSmallBatch_k(int **__restrict__ A,int **__restrict__ B,int **M,int *sA, int *sB, int sM){
     int tidx = threadIdx.x%sM;
-    printf("tidx = %d\n",tidx);
+    // printf("tidx = %d\n",tidx);
     int Qt = (threadIdx.x-tidx)/sM;
     // printf("Qt = %d\n",Qt);
     int gbx = Qt + blockIdx.x*(blockDim.x/sM);
-    // printf("gbx = %d\n",gbx);
+    printf("gbx = %d\n",gbx);
     if(tidx<sM){
         int2 K;
         int2 P;
@@ -31,7 +31,7 @@ __global__ void mergeSmallBatch_k(int **__restrict__ A,int **__restrict__ B,int 
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
             // __ldg intrinsic and const __restrict__ garanties the compiler that it is read only
-            // thus no aliasing is done 
+            // thus no aliasing is done
             if(Q.y >= 0 && Q.x <= sB[tidx] && (Q.y == sA[tidx] || Q.x == 0 || __ldg(&A[tidx][Q.y]) > __ldg(&B[tidx][Q.x-1]))){
                 if(Q.x==sB[tidx] || Q.y==0 || __ldg(&A[tidx][Q.y-1])<=__ldg(&B[tidx][Q.x])){
                    if(Q.y < sA[tidx] && (Q.x == sB[tidx] || __ldg(&A[tidx][Q.y])<=__ldg(&B[tidx][Q.x]))){
@@ -51,4 +51,6 @@ __global__ void mergeSmallBatch_k(int **__restrict__ A,int **__restrict__ B,int 
             }
         }
     }
+    M[0][304]=2513;
+    printf("%d",M[0][304]);
 }
