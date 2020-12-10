@@ -52,6 +52,8 @@ int main(int argc, char* argv[]) {
     //____________________________________________
 
     //___________ Variable declaration ___________
+    
+    #if QUESTION==2 || QUESTION ==1
     int sizeA,sizeB;
     if (argc < 2) {sizeA = rand()%1024;sizeB = rand()%(1024-sizeA);} // If no arguments are provided, set random sizes
     else if(argc == 2){sizeA=atoi(argv[1]);sizeB=atoi(argv[1]);}
@@ -67,6 +69,16 @@ int main(int argc, char* argv[]) {
     B[0]=rand()%20;
     for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
     for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
+    #endif
+    #if QUESTION==3
+    int sizeM;
+    if (argc < 2) {sizeM = rand()%1024;} 
+    if (argc == 2) {sizeM=atoi(argv[1]);} // If no arguments are provided, set random sizes
+    printf("|M| = %d\n",sizeM);
+    #endif
+    
+    
+    
 
 
     //___________ call kernels ___________________
@@ -170,13 +182,11 @@ int main(int argc, char* argv[]) {
     
     #endif
     #if QUESTION==2
-    //___________ MergeBig _______________________
     printf("__________________ Path big normal __________________\n");
     int *__restrict__ path;
-    int nb_threads = 5;
+    int nb_threads = 128;
     int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
-    if(sizeM<1024) nb_blocks=1024;
-    nb_blocks = 2;
+    //if(sizeM<1024) nb_blocks=1024;
     testCUDA(cudaMalloc((void **)&hA,sizeA*sizeof(int)));
     testCUDA(cudaMalloc((void **)&hB,sizeB*sizeof(int)));
     testCUDA(cudaMalloc((void **)&hM,sizeM*sizeof(int)));
@@ -192,8 +202,6 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
     //____________________________________________
-  
-    //___________ Path Big _______________________
     printf("__________________ Merg big normal _________________\n");
     testCUDA(cudaEventRecord(start,0));
     merged_Big_k<<<nb_blocks,nb_threads>>>(hA,hB,hM,path,sizeM);
@@ -201,10 +209,88 @@ int main(int argc, char* argv[]) {
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
-    testCUDA(cudaMemcpy(M, hM, sizeB*sizeof(int), cudaMemcpyDeviceToHost));
+    testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
     cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
     //print_t(hostM,sizeM);
     //____________________________________________
+    #endif
+
+    #if QUESTION==3
+    int *__restrict__ hD;
+    int *__restrict__ hsD;
+    int *D  ;
+    int *sD ;
+    int padding = 0;
+
+    if(sizeM != 0 && (sizeM & (sizeM-1)) == 0){
+        printf("|M| is a power of 2\n");
+        D  = (int *) malloc(sizeM*sizeof(int));
+        sD = (int *) malloc(sizeM*sizeof(int));
+        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
+    }
+    else{
+        printf("|M| was not a power of 2, it will be changed\n");
+        int power = 1;
+        while(power < sizeM) power*=2;
+        printf("new |M| with padding : %d\n",power);
+        D  = (int *) malloc(power*sizeof(int));
+        sD = (int *) malloc(power*sizeof(int));
+        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
+        for(int i = sizeM;i<power;i++){D[i] = ( int) -1 >> 1;}
+        padding = power-sizeM;
+        sizeM = power;
+    }
+    printf("Assigning M\n");
+    
+    //int nb_threads = 128; // changing it might be smart
+    //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
+    printf("__________________ sort M __________________\n");
+    
+    //if(sizeM<1024) nb_blocks=1024;
+    testCUDA(cudaMalloc((void **)&hsD,sizeM*sizeof(int)));
+    testCUDA(cudaMalloc((void **)&hD,sizeM*sizeof(int)));
+    testCUDA(cudaMemcpy(hD, D, sizeM*sizeof(int), cudaMemcpyHostToDevice));
+    testCUDA(cudaEventRecord(start,0));
+    for(int i=1;i<sizeM;i*=2){
+        for(int j=0;j<sizeM;j+=2*i){
+            
+            if(i>512){
+                int *__restrict__ path;
+                int nblocks = (2*i+1023)/1024 ;
+                //exit(0);
+                testCUDA(cudaMalloc((void **)&path,2*(nblocks+1)*sizeof(int)));
+                pathBig_k   <<<nblocks,1024>>>(&hD[j],&hD[j+i],path,i,i,2*i);
+                merged_Big_k<<<nblocks,1024>>>(&hD[j],&hD[j+i],&hsD[j],path,2*i);
+            }
+            else{
+                mergedSmall_k_ldg<<<1,2*i>>>(&hD[j],&hD[j+i],&hsD[j],i,i,2*i);
+                //cout<<"Check sorted : "<<is_sorted(&hsD[j],i)<<endl;
+                
+            }
+        }
+        int *ht = hD;   
+        hD = hsD;
+        hsD = ht;
+    }
+    int *ht = hD;   
+    hD = hsD;
+    hsD = ht;
+    testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
+    //print_t(&sD[padding],sizeM-padding);
+    testCUDA(cudaEventRecord(stop,0));
+    testCUDA(cudaEventSynchronize(stop));
+    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
+    printf("elapsed time : %f ms\n",TimeVar);
+    cout<<"Check sorted : "<<is_sorted(&sD[padding],sizeM-padding)<<endl;
+    //____________________________________________
+    clock_t begin = clock();
+    qsort(D, sizeM, sizeof(int), cmpfunc);
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("elapsed time : %f ms\n",time_spent*1000);
+    cout<<"Check sorted : "<<is_sorted(D,sizeM)<<endl;
+    
     #endif
   
     //___________ MergeBig _______________________
@@ -237,9 +323,11 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaFreeHost(hostB));
     testCUDA(cudaFreeHost(hostM));
     #endif
+    #if QUESTION == 2||QUESTION==1
     free(A);
     free(B);
     free(M);
+    #endif 
 	testCUDA(cudaEventDestroy(start));
 	testCUDA(cudaEventDestroy(stop));
     // ____________________________________________
@@ -282,6 +370,9 @@ int main(int argc, char* argv[]) {
     // Allocation device 1D
     int size_all_A=0;
     int size_all_B=0;
+    int sizeA;
+    int sizeB;
+    int sizeM;
     for(int i = 0;i<N;i++){ 
         sizeA = rand()%d+1;
         sizeB = (d-sizeA);
