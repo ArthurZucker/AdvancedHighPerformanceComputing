@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventRecord(start,0));
     mergedSmall_k_ldg<<<1,1024>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
-	  testCUDA(cudaEventSynchronize(stop));
+	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
