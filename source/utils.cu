@@ -24,6 +24,11 @@ int is_sorted(const int *seqM,const int sizeM){
             printf("\n\terror index : %d, value = %d, next value = %d",i,seqM[i],seqM[i+1]);
             sorted =  0;
         }
+        else if(seqM[i+1]==0){
+            i++;
+            while(seqM[i+1]==0 && i<sizeM-1) i++;
+            printf(" ... 0 : %d\n",i);
+        }
     }
     return sorted;
     
