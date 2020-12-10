@@ -125,10 +125,10 @@ int main(int argc, char* argv[]) {
     mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
     //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop));
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
+    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
 
     //____________________________________________
 
@@ -226,7 +226,6 @@ int main(int argc, char* argv[]) {
     // printf("elapsed time : %f ms\n",TimeVar);
     // cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
-
     //___________ Cleaning up ____________________
     #if QUESTION == 1
     testCUDA(cudaUnbindTexture ( texture_referenceA ));
@@ -243,6 +242,104 @@ int main(int argc, char* argv[]) {
 	testCUDA(cudaEventDestroy(start));
 	testCUDA(cudaEventDestroy(stop));
     //____________________________________________
+    
+    //__________________________ Batch merge part __________________________
+    // L’objectif est simplement de répartir les block de manière intelligente 
+    // sur l’ensemble des calculs Ai + Bi = Mi .
+    int N = 100; //si trop gros on pet pas allouer sur le gpu (je crois)
+    int d = 306;
+    // int sizeA,sizeB,sizeM;
 
+    // int** all_A = (int**)malloc(N*sizeof(int*));
+    // int** all_B = (int**)malloc(N*sizeof(int*));
+    // int** all_M = (int**)malloc(N*sizeof(int*));
+    // int* all_size_A = (int*)malloc(N*sizeof(int));
+    // int* all_size_B = (int*)malloc(N*sizeof(int));
+    // int* all_size_M = (int*)malloc(N*sizeof(int));
+
+    int** all_A;
+    int** all_B; 
+    int** all_M;
+    int* all_size_A;
+    int* all_size_B;
+    // int* all_size_M;
+    testCUDA(cudaHostAlloc(&all_A,N*sizeof(int*),cudaHostAllocMapped));
+    testCUDA(cudaHostAlloc(&all_B,N*sizeof(int*),cudaHostAllocMapped));
+    testCUDA(cudaHostAlloc(&all_M,N*sizeof(int*),cudaHostAllocMapped));
+    testCUDA(cudaHostAlloc(&all_size_A,N*sizeof(int),cudaHostAllocMapped));
+    testCUDA(cudaHostAlloc(&all_size_B,N*sizeof(int),cudaHostAllocMapped));
+    // testCUDA(cudaHostAlloc(&all_size_M,N*sizeof(int),cudaHostAllocMapped));
+
+    printf("_______ Initialisation___________\n");
+    for(int i = 0;i<N;i++){
+        // printf("i = %d\n",i);
+        sizeA = rand()%d;
+        sizeB = (d-sizeA);
+        sizeM = sizeA+sizeB;
+        // printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
+        all_size_A[i] = sizeA;
+        all_size_B[i] = sizeB;
+        // all_size_M[i] = sizeM;
+
+        // all_A[i] = (int *) malloc(sizeA*sizeof(int));
+        // all_B[i] = (int *) malloc(sizeB*sizeof(int));
+        // all_M[i] = (int *) malloc(sizeM*sizeof(int));
+        testCUDA(cudaHostAlloc(&all_A[i],sizeA*sizeof(int),cudaHostAllocMapped));
+        testCUDA(cudaHostAlloc(&all_B[i],sizeB*sizeof(int),cudaHostAllocMapped));
+        testCUDA(cudaHostAlloc(&all_M[i],sizeM*sizeof(int),cudaHostAllocMapped));
+
+        all_A[i][0]=rand()%20;
+        all_B[i][0]=rand()%20;
+        for(int j=1;j<sizeA;j++){all_A[i][j]=all_A[i][j-1]+rand()%20+1;}
+        for(int j=1;j<sizeB;j++){all_B[i][j]=all_B[i][j-1]+rand()%20+1;}
+    
+    }
+    // for(int i = 0;i<N;i++){
+    //     printf("size A[%d] = %d\n",i,all_size_A[i]);
+    //     printf("size B[%d] = %d\n",i,all_size_B[i]);
+    //     //printf("size M[%d] = %d\n",i,all_size_M[i]);
+    //     for(int j = 0; j< all_size_A[i];j++){
+    //         printf("all_A[%d] = %d\n",j,all_A[i][j]);
+    //     }
+    // }
+
+    printf("_______ Début de la fonction___________\n");
+    int numBlocks = 2; 
+    int threadsPerBlock = 512;
+    testCUDA(cudaEventRecord(start));
+    mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(all_A,all_B,all_M,all_size_A,all_size_B,d);
+    testCUDA(cudaEventRecord(stop));
+	testCUDA(cudaEventSynchronize(stop));
+    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    printf("elapsed time : %f ms\n",TimeVar);
+
+    // printf("_______ Check résultats___________\n");
+    // for(int i = 0;i<1;i++){
+    //     for(int j = 0;j<d;j++){
+    //         printf("M[%d][%d]=%d\n",i,j,all_M[i][j]);
+    //     }
+    // }
+    // for(int i = 0;i<N;i++){
+    //     //printf("%d\n",i);
+    //     cout<<"Check sorted : "<<is_sorted(all_M[i],d)<<endl;
+    // }
+    
+    
+    //for(int i = 0;i<N;i++){free(all_A[i]);free(all_B[i]);free(all_M[i]);}
+    // free(all_A);
+    // free(all_B);
+    // free(all_M);
+    // free(all_size_A);
+    // free(all_size_B);
+    // free(all_size_M);
+    // for(int i = 0;i<N;i++){testCUDA(cudaFreeHost(all_A[i]));testCUDA(cudaFreeHost(all_B[i]));testCUDA(cudaFreeHost(all_M[i]));}
+    // testCUDA(cudaFreeHost(all_A));
+    // testCUDA(cudaFreeHost(all_B));
+    // testCUDA(cudaFreeHost(all_M));
+    // testCUDA(cudaFreeHost(all_size_A));
+    // testCUDA(cudaFreeHost(all_size_B));
+    
+    // testCUDA(cudaEventDestroy(start));
+	// testCUDA(cudaEventDestroy(stop));
 	return 0;
 }
