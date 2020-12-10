@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventRecord(start,0));
     mergedSmall_k_ldg<<<1,1024>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
-	  testCUDA(cudaEventSynchronize(stop));
+	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
@@ -173,7 +173,8 @@ int main(int argc, char* argv[]) {
     //___________ MergeBig _______________________
     printf("__________________ Path big normal __________________\n");
     int *__restrict__ path;
-    int nb_blocks = (sizeM+1023)/1024;
+    int nb_threads = 5;
+    int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
     if(sizeM<1024) nb_blocks=1024;
     nb_blocks = 2;
     testCUDA(cudaMalloc((void **)&hA,sizeA*sizeof(int)));
@@ -185,7 +186,7 @@ int main(int argc, char* argv[]) {
 
     testCUDA(cudaMalloc((void **)&path,2*(nb_blocks+1)*sizeof(int)));
     testCUDA(cudaEventRecord(start,0));
-    pathBig_k<<<nb_blocks,1024>>>(hA,hB,path,sizeA,sizeB,sizeM);
+    pathBig_k<<<nb_blocks,nb_threads>>>(hA,hB,path,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -195,7 +196,7 @@ int main(int argc, char* argv[]) {
     //___________ Path Big _______________________
     printf("__________________ Merg big normal _________________\n");
     testCUDA(cudaEventRecord(start,0));
-    merged_Big_k<<<nb_blocks,1024>>>(hA,hB,hM,path,sizeM);
+    merged_Big_k<<<nb_blocks,nb_threads>>>(hA,hB,hM,path,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -242,7 +243,7 @@ int main(int argc, char* argv[]) {
 	testCUDA(cudaEventDestroy(start));
 	testCUDA(cudaEventDestroy(stop));
     //____________________________________________
-    
+    #if QUESTION==4
     //__________________________ Batch merge part __________________________
     // L’objectif est simplement de répartir les block de manière intelligente 
     // sur l’ensemble des calculs Ai + Bi = Mi .
@@ -312,7 +313,7 @@ int main(int argc, char* argv[]) {
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
-
+    #endif
     // printf("_______ Check résultats___________\n");
     // for(int i = 0;i<1;i++){
     //     for(int j = 0;j<d;j++){
