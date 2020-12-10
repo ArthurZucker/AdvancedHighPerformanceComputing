@@ -169,7 +169,7 @@ int main(int argc, char* argv[]) {
     for(int i=1;i<sizeA;i++){hostM[i]=0;}
     
     #endif
-    
+    #if QUESTION==2
     //___________ MergeBig _______________________
     printf("__________________ Path big normal __________________\n");
     int *__restrict__ path;
@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
     cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
     //print_t(hostM,sizeM);
     //____________________________________________
-  
+    #endif
   
     //___________ MergeBig _______________________
     // printf("__________________ Path big sans shared + ldg __________________\n");
