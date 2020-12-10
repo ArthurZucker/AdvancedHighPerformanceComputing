@@ -15,7 +15,7 @@ __global__ void mergeSmallBatch_k(int **__restrict__ A,int **__restrict__ B,int 
     int Qt = (threadIdx.x-tidx)/sM;
     // printf("Qt = %d\n",Qt);
     int gbx = Qt + blockIdx.x*(blockDim.x/sM);
-    printf("gbx = %d\n",gbx);
+    // printf("gbx = %d\n",gbx);
     if(tidx<sM){
         int2 K;
         int2 P;
