@@ -15,7 +15,8 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-
+#define QUESTION 2
+#define INFO 0
 /*
 TO DO :
  - implement using ldg  avec restricted__  et int4 qui contient 4 int, read only memory
@@ -33,7 +34,8 @@ int main(int argc, char* argv[]) {
     int Tmax;
 	for (int i = 0; i < nDevices; i++) {
 		cudaDeviceProp prop;
-		cudaGetDeviceProperties(&prop, i);
+        cudaGetDeviceProperties(&prop, i);
+        #if INFO == 1
 		printf("Max Grid size: %dx%d\n",  prop.maxGridSize[1], prop.maxGridSize[2]);
 		printf("Max Thread Dim: %d,%d,%d\n", prop.maxThreadsDim[0], prop.maxThreadsDim[1], prop.maxThreadsDim[2]);
 		printf("Max Thread per blocks: %d\n", prop.maxThreadsPerBlock);
@@ -41,6 +43,7 @@ int main(int argc, char* argv[]) {
         printf("Number of multiprocessors on device : %d\n",prop.multiProcessorCount);
         printf("Amount of Shared mem available for int : %d\n",prop.sharedMemPerMultiprocessor/sizeof(int));
         printf("Max running threads : %d\n",prop.maxThreadsPerMultiProcessor*prop.multiProcessorCount);
+        #endif
         Tmax = prop.maxThreadsPerMultiProcessor*prop.multiProcessorCount;
 	}
     //Tmax =1024;
@@ -50,19 +53,31 @@ int main(int argc, char* argv[]) {
 
     //___________ Variable declaration ___________
     int sizeA,sizeB;
-    if (argc < 3) {sizeA = rand()%1024;sizeB = rand()%(1024-sizeA);} // If no arguments are provided, set random sizes
+    if (argc < 2) {sizeA = rand()%1024;sizeB = rand()%(1024-sizeA);} // If no arguments are provided, set random sizes
+    else if(argc == 2){sizeA=atoi(argv[1]);sizeB=atoi(argv[1]);}
     else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
     int sizeM = sizeA+sizeB;
     printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-    int *hostA,*thostA,*hostB,*thostB,*hostM;
+    int *hostA,*thostA,*hostB,*thostB,*hostM,*hA,*hB,*hM;
     int *seqM = (int *) malloc(sizeM*sizeof(int));
     int *A = (int *) malloc(sizeA*sizeof(int));
     int *B = (int *) malloc(sizeB*sizeof(int));
+    int *M = (int *) malloc(sizeM*sizeof(int));
     A[0]=rand()%20;
     B[0]=rand()%20;
     for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
     for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
 
+
+    //___________ call kernels ___________________
+    cudaEvent_t start, stop;
+    testCUDA(cudaEventCreate(&start));
+	testCUDA(cudaEventCreate(&stop));
+    float TimeVar=0;
+
+
+
+    #if QUESTION == 1
     //___________ TO DO: explain texture memory ___________
     testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
     testCUDA(cudaMalloc((void **)&thostB,sizeB*sizeof(int)));
@@ -101,11 +116,7 @@ int main(int argc, char* argv[]) {
     //____________________________________________
 
 
-    //___________ call kernels ___________________
-    cudaEvent_t start, stop;
-    testCUDA(cudaEventCreate(&start));
-	  testCUDA(cudaEventCreate(&stop));
-    float TimeVar=0;
+    
     //____________________________________________
 
     //___________ Shared _________________________
@@ -155,18 +166,26 @@ int main(int argc, char* argv[]) {
     printf("elapsed time : %f ms\n",TimeVar);
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
-
     for(int i=1;i<sizeA;i++){hostM[i]=0;}
+    
+    #endif
+    
     //___________ MergeBig _______________________
     printf("__________________ Path big normal __________________\n");
-    testCUDA(cudaEventRecord(start,0));
     int *__restrict__ path;
-    
-    int nb_threads = (sizeM+1023)/1024;
-    if(sizeM<1024) nb_threads=1024;
+    int nb_blocks = (sizeM+1023)/1024;
+    if(sizeM<1024) nb_blocks=1024;
+    nb_blocks = 2;
+    testCUDA(cudaMalloc((void **)&hA,sizeA*sizeof(int)));
+    testCUDA(cudaMalloc((void **)&hB,sizeB*sizeof(int)));
+    testCUDA(cudaMalloc((void **)&hM,sizeM*sizeof(int)));
 
-    testCUDA(cudaMalloc((void **)&path,sizeM*sizeof(int)));
-    pathBig_k<<<nb_threads,1024>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
+    testCUDA(cudaMemcpy(hA, A, sizeA*sizeof(int), cudaMemcpyHostToDevice));
+    testCUDA(cudaMemcpy(hB, B, sizeB*sizeof(int), cudaMemcpyHostToDevice));
+
+    testCUDA(cudaMalloc((void **)&path,2*(nb_blocks+1)*sizeof(int)));
+    testCUDA(cudaEventRecord(start,0));
+    pathBig_k<<<nb_blocks,1024>>>(hA,hB,path,sizeA,sizeB,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -176,12 +195,13 @@ int main(int argc, char* argv[]) {
     //___________ Path Big _______________________
     printf("__________________ Merg big normal _________________\n");
     testCUDA(cudaEventRecord(start,0));
-    merged_Big_k<<<nb_threads,1024>>>(hostA,hostB,hostM,path,sizeM);
+    merged_Big_k<<<nb_blocks,1024>>>(hA,hB,hM,path,sizeM);
     testCUDA(cudaEventRecord(stop,0));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
+    testCUDA(cudaMemcpy(M, hM, sizeB*sizeof(int), cudaMemcpyDeviceToHost));
+    cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
     //print_t(hostM,sizeM);
     //____________________________________________
   
@@ -206,49 +226,22 @@ int main(int argc, char* argv[]) {
     // printf("elapsed time : %f ms\n",TimeVar);
     // cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
-    
-    // if |M| >> 163 840 (nb max of threads running at the same time?
-    // then, we divide |M|into |M|/163 840 = offset. Each threads takes diag i*offset!
-    // Else, if |M|<163 840, then we can use the same amount of threads? Split in diagonals?
-    // Thus the dimension of the grid will differ based on the index
-    dim3 block_dim(1,1,1);
-    dim3 grid_dim(Tmax,1,1);
-    
-    
-     //___________ MergeBig _______________________
-    // printf("__________________ Path big sans shared + ldg __________________\n");
-    // testCUDA(cudaEventRecord(start,0));
-    // pathBig_k<<<grid_dim,block_dim>>>(hostA,hostB,path,sizeA,sizeB,sizeM);
-    // testCUDA(cudaEventRecord(stop,0));
-	// testCUDA(cudaEventSynchronize(stop));
-    // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    // printf("elapsed time : %f ms\n",TimeVar);
-    //____________________________________________
-  
-    //___________ Path Big _______________________
-    // printf("__________________ Merg big sans shared + ldg _________________\n");
-    // testCUDA(cudaEventRecord(start,0));
-    // merged_Big_k<<<163840,1>>>(hostA,hostB,hostM,path,sizeM);
-    // testCUDA(cudaEventRecord(stop,0));
-	// testCUDA(cudaEventSynchronize(stop));
-    // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    // printf("elapsed time : %f ms\n",TimeVar);
-    // cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-    //____________________________________________
-
 
     //___________ Cleaning up ____________________
+    #if QUESTION == 1
     testCUDA(cudaUnbindTexture ( texture_referenceA ));
     testCUDA(cudaUnbindTexture ( texture_referenceB ));
     cudaFree(thostA);
     cudaFree(thostB);
-    free(A);
-    free(B);
     testCUDA(cudaFreeHost(hostA));
     testCUDA(cudaFreeHost(hostB));
+    testCUDA(cudaFreeHost(hostM));
+    #endif
+    free(A);
+    free(B);
+    free(M);
 	testCUDA(cudaEventDestroy(start));
 	testCUDA(cudaEventDestroy(stop));
-    testCUDA(cudaFreeHost(hostM));
     //____________________________________________
 
 	return 0;
