@@ -34,7 +34,10 @@ int is_sorted(const int *seqM,const int sizeM){
     
 }
 
-
+int cmpfunc (const void * a, const void * b) {
+    return ( *(int*)a - *(int*)b );
+ }
+ 
 void print_t(const int *seqM,const int sizeM){
     cout<<"[";
     for (int i = 0; i <sizeM-1; i++) 

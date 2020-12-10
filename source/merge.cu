@@ -14,7 +14,7 @@ order to asses the performances
 #include <assert.h>
 #include <time.h>
 #include "merge.h"
-#define VERBOSE 1
+#define VERBOSE 0
 using namespace std;
 // modified at home 
 __device__ void merged_path_seq_device(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b){
@@ -263,7 +263,7 @@ __device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B
     }
 }
 
-__device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
+__device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,const int sA, const int sB, const int sM){
     // each block will launch this one 
     // try window of 64 + shared memory (blokcs of 32) 
     int i  = threadIdx.x;
@@ -307,7 +307,7 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
     // try blocks of 32-64 thread to load in shared only on give the result
     
     if(threadIdx.x == 0){
-        int i = blockDim.x*blockIdx.x + threadIdx.x;
+        int i = blockDim.x*(blockIdx.x);
         int nb_blocks = gridDim.x;              // because last element is at path[2*(GridDim.x-1))] since 195 is last index of thread
         #if VERBOSE == 1
         printf("thread %4d taking care of diagonal %d\n",blockDim.x*blockIdx.x + threadIdx.x,i);
@@ -332,7 +332,7 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
                 if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
                     if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
                         #if VERBOSE == 1
-                        printf("%4d/%4d  Entry point found (%d,%d)\n",blockIdx.x,gridDim.x,Q.y,Q.x);
+                        printf("%4d/%d  Entry point found (%d,%d)\n",blockIdx.x,gridDim.x,Q.y,Q.x);
                         #endif
                         path[2*blockIdx.x]   = Q.y; 
                         path[2*blockIdx.x+1] = Q.x; 
@@ -349,7 +349,7 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
     }
 }
 
-__global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
+__global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, const int *__restrict__ path, const int m){
     // retrieve path[i] and path[i+1] and path[i+2], path[i+3] => use __ldg() for int4!! 
     //           ai            bi          ai+1         bi+1
     //          ( entring point)          (exit point) for the subarrays
@@ -377,5 +377,8 @@ __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__res
 
 }
 
-
+__global__ void    kernel_sort(const int *__restrict__ M, int *__restrict__ sortedM, const int m, const int sub_tab_size){
+    
+     return;
+}
 
