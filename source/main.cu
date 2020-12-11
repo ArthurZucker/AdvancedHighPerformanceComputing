@@ -291,10 +291,7 @@ int main(int argc, char* argv[]) {
     printf("elapsed time : %f ms\n",time_spent*1000);
     cout<<"Check sorted : "<<is_sorted(D,sizeM)<<endl;
     
-    #endif
-  
-    //___________ MergeBig _______________________
-    // printf("__________________ Path big sans shared + ldg __________________\n");
+    // printf("__________________ Path big NAIVE __________________\n");
     // testCUDA(cudaEventRecord(start,0));
     // pathBig_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,path,sizeA,sizeB,sizeM);
     // testCUDA(cudaEventRecord(stop,0));
@@ -302,9 +299,7 @@ int main(int argc, char* argv[]) {
     // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     // printf("elapsed time : %f ms\n",TimeVar);
     //____________________________________________
-  
-    //___________ Path Big _______________________
-    // printf("__________________ Merg big sans shared + ldg _________________\n");
+    // printf("__________________ Merg big NAIVE_________________\n");
     // testCUDA(cudaEventRecord(start,0));
     // merged_Big_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,hostM,path,sizeM);
     // testCUDA(cudaEventRecord(stop,0));
@@ -313,23 +308,10 @@ int main(int argc, char* argv[]) {
     // printf("elapsed time : %f ms\n",TimeVar);
     // cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
-    //___________ Cleaning up ____________________
-    #if QUESTION == 1
-    testCUDA(cudaUnbindTexture ( texture_referenceA ));
-    testCUDA(cudaUnbindTexture ( texture_referenceB ));
-    cudaFree(thostA);
-    cudaFree(thostB);
-    testCUDA(cudaFreeHost(hostA));
-    testCUDA(cudaFreeHost(hostB));
-    testCUDA(cudaFreeHost(hostM));
     #endif
-    #if QUESTION == 2||QUESTION==1
-    free(A);
-    free(B);
-    free(M);
-    #endif 
-	testCUDA(cudaEventDestroy(start));
-	testCUDA(cudaEventDestroy(stop));
+  
+    
+    
     // ____________________________________________
     #if QUESTION==4
     //__________________________ Batch merge part __________________________
@@ -462,27 +444,48 @@ int main(int argc, char* argv[]) {
     int numBlocks = N; //big number
     int threadsPerBlock = d; // multiple de d
     testCUDA(cudaEventRecord(start));
-    mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(all_A,all_B,all_M,all_size_A,all_size_B,N*d,d);
+    mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(all_M,all_M,all_size_A,all_size_B,d);
     testCUDA(cudaEventRecord(stop));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
 
     printf("_______ Check résultats___________\n");
+    int ca = 0;
+    int cb = 0;
+    for(int j =0;j<N;j++){
+        printf("A[%d] = ",j);
+        
+        for(int i =0; i<all_size_A[j]-1;i++){
+            printf("%d,",all_A[ca+i]);
+            
+        }
+        printf("%d",all_A[ca+all_size_A[j]-1]);
+        
+        ca+=all_size_A[j];
+        printf("\tB[%d] = ",j);
+        for(int i =0; i<all_size_B[j]-1;i++){
+            printf("%d,",all_B[cb+i]);
+            
+        }
+        printf("%d\n",all_B[cb+all_size_B[j]-1]);
+        cb+=all_size_B[j];
+    }
+    
 
-    for(int i = 0;i<size_all_A;i++){
-        printf("all_A[%d] = %d\n",i,all_A[i]);
-    }
-    for(int i = 0;i<size_all_B;i++){
-        printf("all_B[%d] = %d\n",i,all_B[i]);
-    }
-    for(int i = 0;i<N*d;i++){
-        printf("M[%d]=%d\n",i,all_M[i]);
-    }
+    // for(int i = 0;i<size_all_A;i++){
+    //     printf("all_A[%d] = %d\n",i,all_A[i]);
+    // }
+    // for(int i = 0;i<size_all_B;i++){
+    //     printf("all_B[%d] = %d\n",i,all_B[i]);
+    // }
+    printf("M = ");
+    print_t(all_M,N*d);
+    
 
-    // for(int i = 0;i<N;i++){
+    // for(int i = 0;i<N*d;i+=d){
     //     //printf("%d\n",i);
-    //     cout<<"Check sorted : "<<is_sorted(all_M[i],d)<<endl;
+    //     cout<<"Check sorted M["<<i/d<<"] : "<<is_sorted(&all_M[i],d)<<endl;
     // }
 
     // for(int i = 0;i<N;i++){
@@ -508,5 +511,24 @@ int main(int argc, char* argv[]) {
     // testCUDA(cudaEventDestroy(start));
     // testCUDA(cudaEventDestroy(stop));
     #endif
+
+    //___________ Cleaning up ____________________
+    #if QUESTION == 1
+    testCUDA(cudaUnbindTexture ( texture_referenceA ));
+    testCUDA(cudaUnbindTexture ( texture_referenceB ));
+    cudaFree(thostA);
+    cudaFree(thostB);
+    testCUDA(cudaFreeHost(hostA));
+    testCUDA(cudaFreeHost(hostB));
+    testCUDA(cudaFreeHost(hostM));
+    #endif
+    #if QUESTION == 2||QUESTION==1
+    free(A);
+    free(B);
+    free(M);
+    #endif 
+	testCUDA(cudaEventDestroy(start));
+    testCUDA(cudaEventDestroy(stop));
+    
 	return 0;
 }

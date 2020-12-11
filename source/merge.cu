@@ -377,8 +377,4 @@ __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__res
 
 }
 
-__global__ void    kernel_sort(const int *__restrict__ M, int *__restrict__ sortedM, const int m, const int sub_tab_size){
-    
-     return;
-}
 
