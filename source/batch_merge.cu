@@ -9,18 +9,14 @@
 #include <time.h>
 #include "batch_merge.h"
 
-__global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
+__global__ void mergeSmallBatch_k_ldg(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
     int tidx = threadIdx.x%d;
     int Qt = (threadIdx.x-tidx)/d;
     int gbx = Qt + blockIdx.x*(blockDim.x/d);
     // printf("threadIdx = %d; blockIdx = %d; tidx = %d, Qt = %d, gbx = %d, combined=%d\n",threadIdx.x,blockIdx.x,tidx,Qt,gbx,tidx+gbx*d);
-    // for(int i = 0;i<6;i++){ 
-    //     printf("all_size_A[%d]=%d, all_size_B[%d]=%d \n",i,sA[i],i,sB[i]);
-    // }
-    int blx = blockIdx.x;
+
     int sA = all_sA[gbx];
     int sB = all_sB[gbx];
-    // printf("sB[%d]=%d\n",blx,sB[blx]);
     int *A = &all_M[gbx*d];
     int *B = &all_M[gbx*d+sA];
    
