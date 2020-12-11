@@ -15,7 +15,7 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 5
+#define QUESTION 4
 #define INFO 0
 /*
 TO DO :
@@ -659,11 +659,8 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaFreeHost(host_all_STM));
     testCUDA(cudaFreeHost(host_all_size_A));
     testCUDA(cudaFreeHost(host_all_size_B));
-    
-    testCUDA(cudaEventDestroy(start));
-    testCUDA(cudaEventDestroy(stop));
     #endif
-
+    //___________________________Question 5_____________________________
     #if QUESTION == 5
     int *__restrict__ hD;
     int *__restrict__ hsD;
@@ -702,7 +699,7 @@ int main(int argc, char* argv[]) {
         int threadsPerBlock = 2*i; 
         int numBlocks = sizeM/threadsPerBlock; 
         testCUDA(cudaEventRecord(start));
-        SortSmallBatch_k<<<numBlocks,threadsPerBlock>>>(hD,hsD,i,2*i);
+        SortSmallBatch_k_ldg<<<numBlocks,threadsPerBlock>>>(hD,hsD,i,2*i);
         testCUDA(cudaEventRecord(stop));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));

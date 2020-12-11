@@ -172,7 +172,6 @@ __global__ void SortSmallBatch_k_ldg(int *__restrict__ all_M,int *M,int si,int d
     // for(int i = 0;i<6;i++){ 
     //     printf("all_size_A[%d]=%d, all_size_B[%d]=%d \n",i,sA[i],i,sB[i]);
     // }
-    int blx = blockIdx.x;
     int sA = si;
     int sB = si;
     // printf("sB[%d]=%d\n",blx,sB[blx]);
@@ -228,7 +227,6 @@ __global__ void SortSmallBatch_k(int *__restrict__ all_M,int *M,int si,int d){
     // for(int i = 0;i<6;i++){ 
     //     printf("all_size_A[%d]=%d, all_size_B[%d]=%d \n",i,sA[i],i,sB[i]);
     // }
-    int blx = blockIdx.x;
     int sA = si;
     int sB = si;
     // printf("sB[%d]=%d\n",blx,sB[blx]);
