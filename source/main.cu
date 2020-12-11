@@ -335,7 +335,7 @@ int main(int argc, char* argv[]) {
     //__________________________ Batch merge part __________________________
     // L’objectif est simplement de répartir les block de manière intelligente 
     // sur l’ensemble des calculs Ai + Bi = Mi .
-    int N = 100000; //si trop gros on peut pas allouer sur le gpu (je crois)
+    int N = 1000; //si trop gros on peut pas allouer sur le gpu (je crois)
     int d = 306; //306
     
     // _________________________________zero copy____________________________________ 
@@ -451,7 +451,6 @@ int main(int argc, char* argv[]) {
 
     // printf("_______ Check résultats___________\n");
     all_sorted=1;
-    sorted;
     for(int i = 0;i<N*d;i+=d){
         sorted = is_sorted(&host_all_STM[i],d);
         if(sorted ==0){
@@ -608,6 +607,59 @@ int main(int argc, char* argv[]) {
     else{
         printf("There is a table not sorted !\n");
     }
+
+    // printf("_______ Shared___________\n");
+    // numBlocks = N; //big number
+    // threadsPerBlock = d; // multiple de d
+    // testCUDA(cudaEventRecord(start));
+    // mergeSmallBatch_k_shared<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
+    // testCUDA(cudaEventRecord(stop));
+	// testCUDA(cudaEventSynchronize(stop));
+    // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    // printf("elapsed time : %f ms\n",TimeVar);
+    // testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
+
+    // // printf("_______ Check résultats___________\n");
+    // all_sorted=1;
+    // for(int i = 0;i<N*d;i+=d){
+    //     sorted = is_sorted(&all_STM[i],d);
+    //     if(sorted ==0){
+    //         cout<<"Check sorted : "<<sorted<<endl;
+    //         all_sorted = 0;
+    //     }
+    // }
+    // if(all_sorted==1){
+    //     printf("All table are sorted !\n");
+    // }
+    // else{
+    //     printf("There is a table not sorted !\n");
+    // }
+
+    //_______________ quicksort Sequential _________________
+    printf("____________________________Quicksort sequential_________________________________\n");
+    clock_t begin = clock();
+    for(int i=0;i<N*d;i+=d)
+        qsort(&all_M[i], d, sizeof(int), cmpfunc);
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("elapsed time : %f ms\n",time_spent*1000);
+    all_sorted=1;
+    for(int i = 0;i<N*d;i+=d){
+        sorted = is_sorted(&all_M[i],d);
+        if(sorted ==0){
+            cout<<"Check sorted : "<<sorted<<endl;
+            all_sorted = 0;
+        }
+    }
+    if(all_sorted==1){
+        printf("All table are sorted !\n");
+    }
+    else{
+        printf("There is a table not sorted !\n");
+    }
+
+
+    //____________________________________________
 
     printf("_______ Cleaning ___________\n");
     // clean copy 
