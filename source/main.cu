@@ -335,7 +335,7 @@ int main(int argc, char* argv[]) {
     //__________________________ Batch merge part __________________________
     // L’objectif est simplement de répartir les block de manière intelligente 
     // sur l’ensemble des calculs Ai + Bi = Mi .
-    int N = 6; //si trop gros on pet pas allouer sur le gpu (je crois)
+    int N = 6; //si trop gros on peut pas allouer sur le gpu (je crois)
     int d = 3; //306
     // int sizeA,sizeB,sizeM;
 
@@ -347,12 +347,13 @@ int main(int argc, char* argv[]) {
     // int* all_size_B = (int*)malloc(N*sizeof(int));
     // int* all_size_M = (int*)malloc(N*sizeof(int));
 
-    // int** all_A;
-    // int** all_B; 
+    int** all_A;
+    int** all_B; 
     // int** all_M;
-    int* all_A;
-    int* all_B; 
+    // int* all_A;
+    // int* all_B; 
     int* all_M;
+    int* all_STM;
     int* all_size_A;
     int* all_size_B;
     // int* all_size_M;
@@ -383,13 +384,18 @@ int main(int argc, char* argv[]) {
         size_all_A += sizeA;
         size_all_B +=sizeB;
     }
+
     // for(int i = 0;i<N;i++){ 
     //     printf("all_size_A[%d]=%d, all_size_B[%d]=%d \n",i,all_size_A[i],i,all_size_B[i]);
     // }
-    printf("size_all_A = %d, size_all_B = %d, size_all_A + size_all_B = %d, size_all_M = %d\n",size_all_A,size_all_B,size_all_A+size_all_B,N*d);
+    // printf("size_all_A = %d, size_all_B = %d, size_all_A + size_all_B = %d, size_all_M = %d\n",size_all_A,size_all_B,size_all_A+size_all_B,N*d);
     testCUDA(cudaHostAlloc(&all_A,size_all_A*sizeof(int),cudaHostAllocMapped));
     testCUDA(cudaHostAlloc(&all_B,size_all_B*sizeof(int),cudaHostAllocMapped));
-    testCUDA(cudaHostAlloc(&all_M,N*d*sizeof(int),cudaHostAllocMapped));    
+    // testCUDA(cudaHostAlloc(&all_M,N*d*sizeof(int),cudaHostAllocMapped));    
+
+    printf("size_all_A = %d, size_all_B = %d, size_all_A + size_all_B = %d, size_all_M = %d\n",size_all_A,size_all_B,size_all_A+size_all_B,N*d);
+    testCUDA(cudaHostAlloc(&all_ST,M,N*d*sizeof(int),cudaHostAllocMapped));    
+    testCUDA(cudaHostAlloc(&all_M,N*d*sizeof(int),cudaHostAllocMapped));  
 
     printf("_______ Initialisation___________\n");
     // début init 1D
@@ -438,9 +444,9 @@ int main(int argc, char* argv[]) {
         }
         tmp_A+= all_size_A[i];
 
-        // for(int j = all_size_A[i-1];j<all_size_A[i];j++){
-        //     printf("all_A[%d] = %d\n",j,all_A[j]);
-        // }
+        for(int j = all_size_A[i-1];j<all_size_A[i];j++){
+            printf("all_A[%d] = %d\n",j,all_A[j]);
+        }
 
         all_B[tmp_B]=rand()%20;
         for(int j = tmp_B+1;j<tmp_B+all_size_B[i];j++){
@@ -448,12 +454,12 @@ int main(int argc, char* argv[]) {
         }
         tmp_B+= all_size_B[i];
     }
-    // for(int i=0;i<N;i++){
-    //     printf("all_size_B[%d] = %d\n",i,all_size_B[i]);
-    // }
-    // for(int i = 0;i<size_all_B;i++){
-    //     printf("all_B[%d] = %d\n",i,all_B[i]);
-    // }
+    for(int i = 0;i<size_all_A;i++){
+        printf("all_A[%d] = %d\n",i,all_A[i]);
+    }
+    for(int i = 0;i<size_all_B;i++){
+        printf("all_B[%d] = %d\n",i,all_B[i]);
+    }
 
     testCUDA(cudaEventCreate(&start));
     testCUDA(cudaEventCreate(&stop));
