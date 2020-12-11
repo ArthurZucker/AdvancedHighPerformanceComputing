@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     float TimeVar=0;
 
 
-
+    //___________________________Question 1_________________________________
     #if QUESTION == 1
     //___________ TO DO: explain texture memory ___________
     testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
@@ -181,6 +181,8 @@ int main(int argc, char* argv[]) {
     for(int i=1;i<sizeA;i++){hostM[i]=0;}
     
     #endif
+
+    //___________________________Question 2_________________________________
     #if QUESTION==2
     printf("__________________ Path big normal __________________\n");
     int *__restrict__ path;
@@ -215,6 +217,7 @@ int main(int argc, char* argv[]) {
     //____________________________________________
     #endif
 
+    //___________________________Question 3_________________________________
     #if QUESTION==3
     int *__restrict__ hD;
     int *__restrict__ hsD;
@@ -572,7 +575,7 @@ int main(int argc, char* argv[]) {
     printf("_________________ Normal_____________________\n");
 
     numBlocks = N; //big number
-    threadsPerBlock = d; // multiple de d
+    threadsPerBlock = d; // multiple of d
     testCUDA(cudaEventRecord(start));
     mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
     testCUDA(cudaEventRecord(stop));
