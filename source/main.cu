@@ -335,11 +335,11 @@ int main(int argc, char* argv[]) {
     //__________________________ Batch merge part __________________________
     // L’objectif est simplement de répartir les block de manière intelligente 
     // sur l’ensemble des calculs Ai + Bi = Mi .
-    int N = 10; //si trop gros on peut pas allouer sur le gpu (je crois)
-    int d = 6; //306
-
+    int N = 100000; //si trop gros on peut pas allouer sur le gpu (je crois)
+    int d = 306; //306
+    
     // _________________________________zero copy____________________________________ 
-    printf("_______________________________zero copy____________________________________\n");
+    printf("_______________________________Zero copy____________________________________\n");
     int* host_all_M;
     int* host_all_STM;
     int* host_all_size_A;
@@ -365,11 +365,11 @@ int main(int argc, char* argv[]) {
     }
 
     // allocation for M and STM
-    printf("size_all_A = %d, size_all_B = %d, size_all_A + size_all_B = %d, size_all_M = %d\n",size_all_A,size_all_B,size_all_A+size_all_B,N*d);
+    // printf("size_all_A = %d, size_all_B = %d, size_all_A + size_all_B = %d, size_all_M = %d\n",size_all_A,size_all_B,size_all_A+size_all_B,N*d);
     testCUDA(cudaHostAlloc(&host_all_STM,N*d*sizeof(int),cudaHostAllocMapped));    
     testCUDA(cudaHostAlloc(&host_all_M,N*d*sizeof(int),cudaHostAllocMapped));  
 
-    printf("_______ Initialisation___________\n");
+    // printf("_______ Initialisation___________\n");
     // début init 1D
     if(host_all_size_A[0]!=0){
         host_all_M[0]=rand()%20+1;
@@ -412,9 +412,36 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventCreate(&start));
     testCUDA(cudaEventCreate(&stop));
     
-    printf("_______ Début de la fonction___________\n");
+    printf("_______ LDG___________\n");
     int numBlocks = N; //big number
     int threadsPerBlock = d; // multiple de d
+    testCUDA(cudaEventRecord(start));
+    mergeSmallBatch_k_ldg<<<numBlocks,threadsPerBlock>>>(host_all_M,host_all_STM,host_all_size_A,host_all_size_B,d);
+    testCUDA(cudaEventRecord(stop));
+	testCUDA(cudaEventSynchronize(stop));
+    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    printf("elapsed time : %f ms\n",TimeVar);
+
+    // printf("_______ Check résultats___________\n");
+    int all_sorted=1;
+    int sorted;
+    for(int i = 0;i<N*d;i+=d){
+        sorted = is_sorted(&host_all_STM[i],d);
+        if(sorted ==0){
+            cout<<"Check sorted : "<<sorted<<endl;
+            all_sorted = 0;
+        }
+    }
+    if(all_sorted==1){
+        printf("All table are sorted !\n");
+    }
+    else{
+        printf("There is a table not sorted !\n");
+    }
+
+    printf("_______ Normal___________\n");
+    numBlocks = N; //big number
+    threadsPerBlock = d; // multiple de d
     testCUDA(cudaEventRecord(start));
     mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(host_all_M,host_all_STM,host_all_size_A,host_all_size_B,d);
     testCUDA(cudaEventRecord(stop));
@@ -422,9 +449,9 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
 
-    printf("_______ Check résultats___________\n");
-    int all_sorted=1;
-    int sorted;
+    // printf("_______ Check résultats___________\n");
+    all_sorted=1;
+    sorted;
     for(int i = 0;i<N*d;i+=d){
         sorted = is_sorted(&host_all_STM[i],d);
         if(sorted ==0){
@@ -476,7 +503,7 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaMalloc((void **)&h_all_M,N*d*sizeof(int)));
     testCUDA(cudaMalloc((void **)&h_all_STM,N*d*sizeof(int)));
 
-    printf("_______ Initialisation___________\n");
+    // printf("_______ Initialisation___________\n");
     // début init 1D
     if(all_size_A[0]!=0){
         all_M[0]=rand()%20+1;
@@ -520,7 +547,38 @@ int main(int argc, char* argv[]) {
     // }
     testCUDA(cudaMemcpy(h_all_M, all_M, N*d*sizeof(int), cudaMemcpyHostToDevice));
 
-    printf("_______ Début de la fonction___________\n");
+    printf("_______ LDG___________\n");
+    numBlocks = N; //big number
+    threadsPerBlock = d; // multiple de d
+    testCUDA(cudaEventRecord(start));
+    mergeSmallBatch_k_ldg<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
+    testCUDA(cudaEventRecord(stop));
+	testCUDA(cudaEventSynchronize(stop));
+    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    printf("elapsed time : %f ms\n",TimeVar);
+    testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
+
+    // for(int i = 1;i<N*d;i++){
+    //     printf("STM[%d]=%d\n",i,all_STM[i]);
+    // }
+
+    // printf("_______ Check résultats___________\n");
+    all_sorted=1;
+    for(int i = 0;i<N*d;i+=d){
+        sorted = is_sorted(&all_STM[i],d);
+        if(sorted ==0){
+            cout<<"Check sorted : "<<sorted<<endl;
+            all_sorted = 0;
+        }
+    }
+    if(all_sorted==1){
+        printf("All table are sorted !\n");
+    }
+    else{
+        printf("There is a table not sorted !\n");
+    }
+
+    printf("_______ Normal___________\n");
     numBlocks = N; //big number
     threadsPerBlock = d; // multiple de d
     testCUDA(cudaEventRecord(start));
@@ -535,7 +593,7 @@ int main(int argc, char* argv[]) {
     //     printf("STM[%d]=%d\n",i,all_STM[i]);
     // }
 
-    printf("_______ Check résultats___________\n");
+    // printf("_______ Check résultats___________\n");
     all_sorted=1;
     for(int i = 0;i<N*d;i+=d){
         sorted = is_sorted(&all_STM[i],d);
