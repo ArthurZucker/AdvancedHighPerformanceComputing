@@ -15,7 +15,7 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 4
+#define QUESTION 5
 #define INFO 0
 /*
 TO DO :
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
     for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
     #endif
-    #if QUESTION==3
+    #if QUESTION==3 || QUESTION == 5
     int sizeM;
     if (argc < 2) {sizeM = rand()%1024;} 
     if (argc == 2) {sizeM=atoi(argv[1]);} // If no arguments are provided, set random sizes
@@ -317,181 +317,127 @@ int main(int argc, char* argv[]) {
     //__________________________ Batch merge part __________________________
     // L’objectif est simplement de répartir les block de manière intelligente 
     // sur l’ensemble des calculs Ai + Bi = Mi .
-    int N = 6; //si trop gros on pet pas allouer sur le gpu (je crois)
-    int d = 3; //306
-    // int sizeA,sizeB,sizeM;
+    int N = 1000000; //si trop gros on peut pas allouer sur le gpu (je crois)
+    int d = 10; //306
 
-    // Allocation globale 2D
-    // int** all_A = (int**)malloc(N*sizeof(int*));
-    // int** all_B = (int**)malloc(N*sizeof(int*));
-    // int** all_M = (int**)malloc(N*sizeof(int*));
-    // int* all_size_A = (int*)malloc(N*sizeof(int));
-    // int* all_size_B = (int*)malloc(N*sizeof(int));
-    // int* all_size_M = (int*)malloc(N*sizeof(int));
-
-    // int** all_A;
-    // int** all_B; 
-    // int** all_M;
-    int* all_A;
-    int* all_B; 
+    // int* all_A;
+    // int* all_B; 
     int* all_M;
+    int* all_STM;
     int* all_size_A;
     int* all_size_B;
-    // int* all_size_M;
 
     // allocation for save size
     testCUDA(cudaHostAlloc(&all_size_A,N*sizeof(int),cudaHostAllocMapped));
     testCUDA(cudaHostAlloc(&all_size_B,N*sizeof(int),cudaHostAllocMapped));
-    // testCUDA(cudaHostAlloc(&all_size_M,N*sizeof(int),cudaHostAllocMapped));
-    
-    // Allocation device 2D
-    // testCUDA(cudaHostAlloc(&all_A,N*sizeof(int*),cudaHostAllocMapped));
-    // testCUDA(cudaHostAlloc(&all_B,N*sizeof(int*),cudaHostAllocMapped));
-    // testCUDA(cudaHostAlloc(&all_M,N*sizeof(int*),cudaHostAllocMapped));
 
     // Allocation device 1D
     int size_all_A=0;
     int size_all_B=0;
     int sizeA;
     int sizeB;
-    int sizeM;
     for(int i = 0;i<N;i++){ 
         sizeA = rand()%d+1;
         sizeB = (d-sizeA);
-        sizeM = sizeA+sizeB;
-        printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
+        // printf("|A| = %d, |B| = %d\n",sizeA,sizeB);
         all_size_A[i] = sizeA;
         all_size_B[i] = sizeB;
         size_all_A += sizeA;
         size_all_B +=sizeB;
     }
-    // for(int i = 0;i<N;i++){ 
-    //     printf("all_size_A[%d]=%d, all_size_B[%d]=%d \n",i,all_size_A[i],i,all_size_B[i]);
-    // }
+
+    // allocation for M and STM
     printf("size_all_A = %d, size_all_B = %d, size_all_A + size_all_B = %d, size_all_M = %d\n",size_all_A,size_all_B,size_all_A+size_all_B,N*d);
-    testCUDA(cudaHostAlloc(&all_A,size_all_A*sizeof(int),cudaHostAllocMapped));
-    testCUDA(cudaHostAlloc(&all_B,size_all_B*sizeof(int),cudaHostAllocMapped));
-    testCUDA(cudaHostAlloc(&all_M,N*d*sizeof(int),cudaHostAllocMapped));    
+    testCUDA(cudaHostAlloc(&all_STM,N*d*sizeof(int),cudaHostAllocMapped));    
+    testCUDA(cudaHostAlloc(&all_M,N*d*sizeof(int),cudaHostAllocMapped));  
 
     printf("_______ Initialisation___________\n");
     // début init 1D
-    all_A[0]=rand()%20;
-    for(int j = 1;j<all_size_A[0];j++){
-        all_A[j]=all_A[j-1]+rand()%20+1;
+    if(all_size_A[0]!=0){
+        all_M[0]=rand()%20+1;
+        printf("M[0]=%d\n",all_M[0]);
+        for(int j = 1;j<all_size_A[0];j++){
+            all_M[j]=all_M[j-1]+rand()%20+1;
+            printf("M[%d]=%d\n",j,all_M[j]);
+        }
     }
-    all_B[0]=rand()%20;
-    for(int j = 1;j<all_size_B[0];j++){
-        all_B[j]=all_B[j-1]+rand()%20+1;
+    if(all_size_B[0]!=0){
+        all_M[all_size_A[0]]=rand()%20+1;
+        printf("M[%d]=%d\n",all_size_A[0],all_M[all_size_A[0]]);
+        for(int j = all_size_A[0]+1;j<all_size_B[0]+all_size_A[0];j++){
+            all_M[j]=all_M[j-1]+rand()%20+1;
+            printf("M[%d]=%d\n",j,all_M[j]);
+        }
     }
-    // fin init 1D
+    //fin init 1D
     int tmp_A=all_size_A[0];
     int tmp_B=all_size_B[0];
-    for(int i = 1;i<N;i++){ // mettre N pour deux 2D et commencer à 0 
-        // printf("i = %d\n",i);
-        // sizeA = rand()%d;
-        // sizeB = (d-sizeA);
-        // sizeM = sizeA+sizeB;
-        // printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-        // all_size_A[i] = sizeA;
-        // all_size_B[i] = sizeB;
-        
-        // all_size_M[i] = sizeM;
-
-        // Allocation gobale 2D
-        // all_A[i] = (int *) malloc(sizeA*sizeof(int));
-        // all_B[i] = (int *) malloc(sizeB*sizeof(int));
-        // all_M[i] = (int *) malloc(sizeM*sizeof(int));
-        
-        // Allocation device 2D
-        // testCUDA(cudaHostAlloc(&all_A[i],sizeA*sizeof(int),cudaHostAllocMapped));
-        // testCUDA(cudaHostAlloc(&all_B[i],sizeB*sizeof(int),cudaHostAllocMapped));
-        // testCUDA(cudaHostAlloc(&all_M[i],sizeM*sizeof(int),cudaHostAllocMapped));
-
-        // Initialisation 2D
-        // all_A[i][0]=rand()%20;
-        // all_B[i][0]=rand()%20;
-        // for(int j=1;j<sizeA;j++){all_A[i][j]=all_A[i][j-1]+rand()%20+1;}
-        // for(int j=1;j<sizeB;j++){all_B[i][j]=all_B[i][j-1]+rand()%20+1;}
-        
-        // Initialisation 1D
-        all_A[tmp_A]=rand()%20;
-        for(int j = tmp_A+1;j<tmp_A+all_size_A[i];j++){
-            all_A[j]=all_A[j-1]+rand()%20+1;
+    for(int i = 1;i<N;i++){ 
+        // Initialisation 1D 1 tableau
+        if(all_size_A[i]!=0){
+            all_M[tmp_A+tmp_B]=rand()%20+1;
+            for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+all_size_A[i];j++){
+                all_M[j]=all_M[j-1]+rand()%20+1;
+            }
+            tmp_A+= all_size_A[i];
+    
         }
-        tmp_A+= all_size_A[i];
-
-        // for(int j = all_size_A[i-1];j<all_size_A[i];j++){
-        //     printf("all_A[%d] = %d\n",j,all_A[j]);
-        // }
-
-        all_B[tmp_B]=rand()%20;
-        for(int j = tmp_B+1;j<tmp_B+all_size_B[i];j++){
-            all_B[j]=all_B[j-1]+rand()%20+1;
+        if(all_size_B[i]!=0){
+            all_M[tmp_A+tmp_B]=rand()%20+1;
+            for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+all_size_B[i];j++){
+                all_M[j]=all_M[j-1]+rand()%20+1;
+            }
+            tmp_B+= all_size_B[i];
         }
-        tmp_B+= all_size_B[i];
     }
-    // for(int i=0;i<N;i++){
-    //     printf("all_size_B[%d] = %d\n",i,all_size_B[i]);
-    // }
-    // for(int i = 0;i<size_all_B;i++){
-    //     printf("all_B[%d] = %d\n",i,all_B[i]);
-    // }
 
     testCUDA(cudaEventCreate(&start));
     testCUDA(cudaEventCreate(&stop));
     
     printf("_______ Début de la fonction___________\n");
     int numBlocks = N; //big number
+    
     int threadsPerBlock = d; // multiple de d
     testCUDA(cudaEventRecord(start));
-    mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(all_M,all_M,all_size_A,all_size_B,d);
+    mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(all_M,all_STM,all_size_A,all_size_B,d);
     testCUDA(cudaEventRecord(stop));
 	testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
 
     printf("_______ Check résultats___________\n");
-    int ca = 0;
-    int cb = 0;
-    for(int j =0;j<N;j++){
-        printf("A[%d] = ",j);
-        
-        for(int i =0; i<all_size_A[j]-1;i++){
-            printf("%d,",all_A[ca+i]);
-            
+    int all_sorted=1;
+    int sorted;
+    for(int i = 0;i<N*d;i+=d){
+        sorted = is_sorted(&all_STM[i],d);
+        if(sorted ==0){
+            cout<<"Check sorted : "<<sorted<<endl;
+            all_sorted = 0;
         }
-        printf("%d",all_A[ca+all_size_A[j]-1]);
-        
-        ca+=all_size_A[j];
-        printf("\tB[%d] = ",j);
-        for(int i =0; i<all_size_B[j]-1;i++){
-            printf("%d,",all_B[cb+i]);
-            
-        }
-        printf("%d\n",all_B[cb+all_size_B[j]-1]);
-        cb+=all_size_B[j];
+    }
+    if(all_sorted==1){
+        printf("All table are sorted !\n");
+    }
+    else{
+        printf("There is a table not sorted !\n");
     }
     
+    //====================== PART D variation ====================================
+    d = 4;
+    // int* all_A;
+    // int* all_B; 
 
-    // for(int i = 0;i<size_all_A;i++){
-    //     printf("all_A[%d] = %d\n",i,all_A[i]);
-    // }
-    // for(int i = 0;i<size_all_B;i++){
-    //     printf("all_B[%d] = %d\n",i,all_B[i]);
-    // }
-    printf("M = ");
-    print_t(all_M,N*d);
-    
+    // Allocation device 1D
+    for(int i = 0;i<N;i++){ 
+        sizeA = rand()%d+1;
+        sizeB = (d-sizeA);
+        // printf("|A| = %d, |B| = %d\n",sizeA,sizeB);
+        all_size_A[i] = sizeA;
+        all_size_B[i] = sizeB;
+        size_all_A += sizeA;
+        size_all_B +=sizeB;
+    }
 
-    // for(int i = 0;i<N*d;i+=d){
-    //     //printf("%d\n",i);
-    //     cout<<"Check sorted M["<<i/d<<"] : "<<is_sorted(&all_M[i],d)<<endl;
-    // }
-
-    // for(int i = 0;i<N;i++){
-    //     //printf("%d\n",i);
-    //     cout<<"Check sorted : "<<is_sorted(all_M[i],d)<<endl;
-    // }
     
     
     //for(int i = 0;i<N;i++){free(all_A[i]);free(all_B[i]);free(all_M[i]);}
@@ -510,6 +456,61 @@ int main(int argc, char* argv[]) {
     
     // testCUDA(cudaEventDestroy(start));
     // testCUDA(cudaEventDestroy(stop));
+    #endif
+
+    #if QUESTION == 5
+    int *__restrict__ hD;
+    int *__restrict__ hsD;
+    int *D  ;
+    int *sD ;
+    int padding = 0;
+
+    if(sizeM != 0 && (sizeM & (sizeM-1)) == 0){
+        printf("|M| is a power of 2\n");
+        D  = (int *) malloc(sizeM*sizeof(int));
+        sD = (int *) malloc(sizeM*sizeof(int));
+        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
+    }
+    else{
+        printf("|M| was not a power of 2, it will be changed\n");
+        int power = 1;
+        while(power < sizeM) power*=2;
+        printf("new |M| with padding : %d\n",power);
+        D  = (int *) malloc(power*sizeof(int));
+        sD = (int *) malloc(power*sizeof(int));
+        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
+        for(int i = sizeM;i<power;i++){D[i] = ( int) -1 >> 1;}
+        padding = power-sizeM;
+        sizeM = power;
+    }
+    printf("Assigning M\n");
+
+
+    printf("Computing time : \n");
+    testCUDA(cudaMalloc((void **)&hsD,sizeM*sizeof(int)));
+    testCUDA(cudaMalloc((void **)&hD,sizeM*sizeof(int)));
+    testCUDA(cudaMemcpy(hD, D, sizeM*sizeof(int), cudaMemcpyHostToDevice));
+    float total_time = 0;
+    for(int i=1;i<=512;i*=2){
+        
+        int threadsPerBlock = 2*i; 
+        int numBlocks = sizeM/threadsPerBlock; 
+        testCUDA(cudaEventRecord(start));
+        SortSmallBatch_k<<<numBlocks,threadsPerBlock>>>(hD,hsD,i,2*i);
+        testCUDA(cudaEventRecord(stop));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf(" d = %10d : %10.8f ms\n",2*i,TimeVar);
+        total_time+=TimeVar;
+        int *ht = hD;   
+        hD = hsD;
+        hsD = ht;
+    }
+    int *ht = hD;   
+    hD = hsD;
+    hsD = ht;
+    testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
+    printf("\nTotal elapsed time : %f ms\n",total_time);
     #endif
 
     //___________ Cleaning up ____________________
