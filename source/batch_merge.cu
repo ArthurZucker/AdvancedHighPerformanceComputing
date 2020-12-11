@@ -18,7 +18,7 @@
 // size of M is d*N 
 __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
     
-    int tidx = threadIdx.x%d; // to know which element of the below-array (Ai) it treats
+    int tidx = threadIdx.x%d; // to know which element of the below-array the thead treats
     int Qt = (threadIdx.x-tidx)/d;
     int gbx = Qt + blockIdx.x*(blockDim.x/d);// which array it treats
 
