@@ -15,7 +15,7 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 4
+#define QUESTION 5
 #define INFO 0
 /*
 TO DO :
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
     for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
     #endif
-    #if QUESTION==3
+    #if QUESTION==3 || QUESTION == 5
     int sizeM;
     if (argc < 2) {sizeM = rand()%1024;} 
     if (argc == 2) {sizeM=atoi(argv[1]);} // If no arguments are provided, set random sizes
@@ -291,10 +291,7 @@ int main(int argc, char* argv[]) {
     printf("elapsed time : %f ms\n",time_spent*1000);
     cout<<"Check sorted : "<<is_sorted(D,sizeM)<<endl;
     
-    #endif
-  
-    //___________ MergeBig _______________________
-    // printf("__________________ Path big sans shared + ldg __________________\n");
+    // printf("__________________ Path big NAIVE __________________\n");
     // testCUDA(cudaEventRecord(start,0));
     // pathBig_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,path,sizeA,sizeB,sizeM);
     // testCUDA(cudaEventRecord(stop,0));
@@ -302,9 +299,7 @@ int main(int argc, char* argv[]) {
     // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     // printf("elapsed time : %f ms\n",TimeVar);
     //____________________________________________
-  
-    //___________ Path Big _______________________
-    // printf("__________________ Merg big sans shared + ldg _________________\n");
+    // printf("__________________ Merg big NAIVE_________________\n");
     // testCUDA(cudaEventRecord(start,0));
     // merged_Big_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,hostM,path,sizeM);
     // testCUDA(cudaEventRecord(stop,0));
@@ -313,23 +308,10 @@ int main(int argc, char* argv[]) {
     // printf("elapsed time : %f ms\n",TimeVar);
     // cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
-    //___________ Cleaning up ____________________
-    #if QUESTION == 1
-    testCUDA(cudaUnbindTexture ( texture_referenceA ));
-    testCUDA(cudaUnbindTexture ( texture_referenceB ));
-    cudaFree(thostA);
-    cudaFree(thostB);
-    testCUDA(cudaFreeHost(hostA));
-    testCUDA(cudaFreeHost(hostB));
-    testCUDA(cudaFreeHost(hostM));
     #endif
-    #if QUESTION == 2||QUESTION==1
-    free(A);
-    free(B);
-    free(M);
-    #endif 
-	testCUDA(cudaEventDestroy(start));
-	testCUDA(cudaEventDestroy(stop));
+  
+    
+    
     // ____________________________________________
     #if QUESTION==4
     //__________________________ Batch merge part __________________________
@@ -681,5 +663,79 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventDestroy(start));
     testCUDA(cudaEventDestroy(stop));
     #endif
+
+    #if QUESTION == 5
+    int *__restrict__ hD;
+    int *__restrict__ hsD;
+    int *D  ;
+    int *sD ;
+    int padding = 0;
+
+    if(sizeM != 0 && (sizeM & (sizeM-1)) == 0){
+        printf("|M| is a power of 2\n");
+        D  = (int *) malloc(sizeM*sizeof(int));
+        sD = (int *) malloc(sizeM*sizeof(int));
+        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
+    }
+    else{
+        printf("|M| was not a power of 2, it will be changed\n");
+        int power = 1;
+        while(power < sizeM) power*=2;
+        printf("new |M| with padding : %d\n",power);
+        D  = (int *) malloc(power*sizeof(int));
+        sD = (int *) malloc(power*sizeof(int));
+        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
+        for(int i = sizeM;i<power;i++){D[i] = ( int) -1 >> 1;}
+        padding = power-sizeM;
+        sizeM = power;
+    }
+    printf("Assigning M\n");
+
+
+    printf("Computing time : \n");
+    testCUDA(cudaMalloc((void **)&hsD,sizeM*sizeof(int)));
+    testCUDA(cudaMalloc((void **)&hD,sizeM*sizeof(int)));
+    testCUDA(cudaMemcpy(hD, D, sizeM*sizeof(int), cudaMemcpyHostToDevice));
+    float total_time = 0;
+    for(int i=1;i<=512;i*=2){
+        
+        int threadsPerBlock = 2*i; 
+        int numBlocks = sizeM/threadsPerBlock; 
+        testCUDA(cudaEventRecord(start));
+        SortSmallBatch_k<<<numBlocks,threadsPerBlock>>>(hD,hsD,i,2*i);
+        testCUDA(cudaEventRecord(stop));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf(" d = %10d : %10.8f ms\n",2*i,TimeVar);
+        total_time+=TimeVar;
+        int *ht = hD;   
+        hD = hsD;
+        hsD = ht;
+    }
+    int *ht = hD;   
+    hD = hsD;
+    hsD = ht;
+    testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
+    printf("\nTotal elapsed time : %f ms\n",total_time);
+    #endif
+
+    //___________ Cleaning up ____________________
+    #if QUESTION == 1
+    testCUDA(cudaUnbindTexture ( texture_referenceA ));
+    testCUDA(cudaUnbindTexture ( texture_referenceB ));
+    cudaFree(thostA);
+    cudaFree(thostB);
+    testCUDA(cudaFreeHost(hostA));
+    testCUDA(cudaFreeHost(hostB));
+    testCUDA(cudaFreeHost(hostM));
+    #endif
+    #if QUESTION == 2||QUESTION==1
+    free(A);
+    free(B);
+    free(M);
+    #endif 
+	testCUDA(cudaEventDestroy(start));
+    testCUDA(cudaEventDestroy(stop));
+    
 	return 0;
 }

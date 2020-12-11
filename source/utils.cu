@@ -26,6 +26,7 @@ int is_sorted(const int *seqM,const int sizeM){
         }
         else if(seqM[i+1]==0){
             i++;
+            printf("null value encountered");
             while(seqM[i+1]==0 && i<sizeM-1) i++;
             printf(" ... 0 : %d\n",i);
         }
@@ -33,7 +34,7 @@ int is_sorted(const int *seqM,const int sizeM){
     return sorted;
     
 }
-
+    
 int cmpfunc (const void * a, const void * b) {
     return ( *(int*)a - *(int*)b );
  }
