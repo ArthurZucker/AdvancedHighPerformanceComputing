@@ -109,7 +109,7 @@ __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, in
     int tidx = threadIdx.x%d;
     int Qt = (threadIdx.x-tidx)/d;
     int gbx = Qt + blockIdx.x*(blockDim.x/d);
-    printf("threadIdx = %d; blockIdx = %d; tidx = %d, Qt = %d, gbx = %d, combined=%d\n",threadIdx.x,blockIdx.x,tidx,Qt,gbx,tidx+gbx*d);
+    // printf("threadIdx = %d; blockIdx = %d; tidx = %d, Qt = %d, gbx = %d, combined=%d\n",threadIdx.x,blockIdx.x,tidx,Qt,gbx,tidx+gbx*d);
     // for(int i = 0;i<6;i++){ 
     //     printf("all_size_A[%d]=%d, all_size_B[%d]=%d \n",i,sA[i],i,sB[i]);
     // }
@@ -141,11 +141,11 @@ __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, in
                 if(Q.x==sB || Q.y==0 || __ldg(&A[Q.y-1])<=__ldg(&B[Q.x])){
                    if(Q.y < sA && (Q.x == sB || __ldg(&A[Q.y])<=__ldg(&B[Q.x]))){
                         M[i] = __ldg(&A[Q.y]);
-                        printf("index globale = %d, threadIdx = %d; blockIdx = %d; tidx = %d, Qt = %d, gbx = %d, __ldg(&A[%d]) = %d\n",i,threadIdx.x,blockIdx.x,tidx,Qt,gbx,Q.y,__ldg(&A[Q.y]));
+                        // printf("index globale = %d, threadIdx = %d; blockIdx = %d; tidx = %d, Qt = %d, gbx = %d, __ldg(&A[%d]) = %d\n",i,threadIdx.x,blockIdx.x,tidx,Qt,gbx,Q.y,__ldg(&A[Q.y]));
                    }
                    else{
                         M[i] = __ldg(&B[Q.x]);
-                        printf("index globale = %d, threadIdx = %d; blockIdx = %d; tidx = %d, Qt = %d, gbx = %d, __ldg(&B[%d]) = %d\n",i,threadIdx.x,blockIdx.x,tidx,Qt,gbx,Q.x,__ldg(&B[Q.x]));
+                        // printf("index globale = %d, threadIdx = %d; blockIdx = %d; tidx = %d, Qt = %d, gbx = %d, __ldg(&B[%d]) = %d\n",i,threadIdx.x,blockIdx.x,tidx,Qt,gbx,Q.x,__ldg(&B[Q.x]));
                    }
                    break;
                 }
