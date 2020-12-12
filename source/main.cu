@@ -15,7 +15,7 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 5
+#define QUESTION 6
 #define INFO 0
 /*
 TO DO :
@@ -675,6 +675,125 @@ int main(int argc, char* argv[]) {
 
     //_________________________________________________________________________________________
 
+    // _________________________Question 5____________________________________
+    #if QUESTION == 6
+    FILE *f = fopen("../results/results.csv", "w"); 
+    fprintf(f, "N,d,time\n");
+    for(int N = 10; N<10000000; N*=10){//10000000 max 
+        for (int d = 2; d<=1024; d*=2){
+            int* all_M = (int *) malloc(N*d*sizeof(int));
+            int* all_STM = (int *) malloc(N*d*sizeof(int));
+            int* all_size_A = (int *) malloc(N*sizeof(int));
+            int* all_size_B = (int *) malloc(N*sizeof(int));
+            int* h_all_M;
+            int* h_all_STM;
+            int* h_all_size_A;
+            int* h_all_size_B;
+
+            // allocation on device for save size
+            testCUDA(cudaMalloc((void **)&h_all_size_A,N*sizeof(int)));
+            testCUDA(cudaMalloc((void **)&h_all_size_B,N*sizeof(int)));
+
+            // Initialisation size
+            int size_all_A=0;
+            int size_all_B=0;
+            int sizeA;
+            int sizeB;
+            for(int i = 0;i<N;i++){ 
+                sizeA = rand()%d+1;
+                sizeB = (d-sizeA);
+                all_size_A[i] = sizeA;
+                all_size_B[i] = sizeB;
+                size_all_A += sizeA;
+                size_all_B +=sizeB;
+            }
+
+            // copy of all size on device
+            testCUDA(cudaMemcpy(h_all_size_A, all_size_A, N*sizeof(int), cudaMemcpyHostToDevice));
+            testCUDA(cudaMemcpy(h_all_size_B, all_size_B, N*sizeof(int), cudaMemcpyHostToDevice));
+            
+            // allocation on device of M and STM
+            testCUDA(cudaMalloc((void **)&h_all_M,N*d*sizeof(int)));
+            testCUDA(cudaMalloc((void **)&h_all_STM,N*d*sizeof(int)));
+
+            // Start initialisation of the first arrays A0 and B0
+            if(all_size_A[0]!=0){
+                all_M[0]=rand()%20+1;
+                for(int j = 1;j<all_size_A[0];j++){
+                    all_M[j]=all_M[j-1]+rand()%20+1;
+                }
+            }
+            if(all_size_B[0]!=0){
+                all_M[all_size_A[0]]=rand()%20+1;
+                for(int j = all_size_A[0]+1;j<all_size_B[0]+all_size_A[0];j++){
+                    all_M[j]=all_M[j-1]+rand()%20+1;
+                }
+            }
+            int tmp_A=all_size_A[0];
+            int tmp_B=all_size_B[0];
+
+            // Initialisation of all arrays 
+            for(int i = 1;i<N;i++){ 
+                if(all_size_A[i]!=0){
+                    all_M[tmp_A+tmp_B]=rand()%20+1;
+                    for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+all_size_A[i];j++){
+                        all_M[j]=all_M[j-1]+rand()%20+1;
+                    }
+                    tmp_A+= all_size_A[i];
+            
+                }
+                if(all_size_B[i]!=0){
+                    all_M[tmp_A+tmp_B]=rand()%20+1;
+                    for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+all_size_B[i];j++){
+                        all_M[j]=all_M[j-1]+rand()%20+1;
+                    }
+                    tmp_B+= all_size_B[i];
+                }
+            }
+            // copy all_M on h_all_M on the device
+            testCUDA(cudaMemcpy(h_all_M, all_M, N*d*sizeof(int), cudaMemcpyHostToDevice));
+
+            int numBlocks = N; //big number
+            int threadsPerBlock = d; // multiple of d
+            testCUDA(cudaEventRecord(start));
+            mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
+            testCUDA(cudaEventRecord(stop));
+            testCUDA(cudaEventSynchronize(stop));
+            testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+            printf("elapsed time for d = %d: %f ms\n",d,TimeVar);
+            fprintf(f, "%d,%d,%f\n",N,d,TimeVar);
+            testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
+
+            // for(int i = 0;i<N*d; i++) printf("sorted M[%d]=%d\n",i,all_STM[i]);
+            // _______________Check results_______________
+            int all_sorted=1;
+            int sorted;
+            for(int i = 0;i<N*d;i+=d){
+                sorted = is_sorted(&all_STM[i],d);
+                if(sorted ==0){
+                    cout<<"Check sorted : "<<sorted<<endl;
+                    all_sorted = 0;
+                }
+            }
+            if(all_sorted==1){
+                printf("All table are sorted !\n");
+            }
+            else{
+                printf("There is a table not sorted !\n");
+            }
+
+            free(all_M);
+            free(all_STM);
+            free(all_size_A);
+            free(all_size_B);
+            testCUDA(cudaFree(h_all_M));
+            testCUDA(cudaFree(h_all_STM));
+            testCUDA(cudaFree(h_all_size_A));
+            testCUDA(cudaFree(h_all_size_B));
+        }
+    }
+    fclose(f); 
+    #endif
     //___________________________Question 5_________________________________
 
     // We choose to use copy because it's faster than zero copy
@@ -705,7 +824,7 @@ int main(int argc, char* argv[]) {
         sizeM = power;
     }
     printf("Assigning M\n");
-
+    // for(int i = 0;i<sizeM;i++) printf("D[%d]=%d\n",i,D[i]);
 
     printf("Computing time : \n");
     testCUDA(cudaMalloc((void **)&hsD,sizeM*sizeof(int)));

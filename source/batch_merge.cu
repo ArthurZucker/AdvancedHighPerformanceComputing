@@ -1,3 +1,8 @@
+/**************************************************************
+This code is an implementation of a large number N of arrays
+{Ai} and {Bi} for i = 1,...,N with |Ai|+|Bi| = d<=1024 
+that merges two by two, for each i, Ai and Bi.
+***************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -11,11 +16,11 @@
 
 // function mergeSmallBatch_k takes a big array all_M containing (Ai and Bi) like this : all_M = (A1|B1|...|AN|BN)
 // it returns M the array of all_M with arrays Ai and Bi merge and sort
-// all_sA contains all size of different A (all_sA[0]= size(A0))
-// all_sB contains all size of different B (all_sB[0]= size(B0))
-// we stocked sizes of Ai and Bi because |Ai|!=|Bi|
-// d is the number of element that there is in the array Mi, i.e all_sA[i]+all_sB[i] = d (|Ai|+|Bi|=d)
-// size of M is d*N 
+// all_sA contains all size of different A (all_sA[0]= |A0|)
+// all_sB contains all size of different B (all_sB[0]= |B0|)
+// we stocked sizes of Ai and Bi because |Ai|!=|Bi| and |Ai| and |Bi| not constant
+// d is the number of element that there is in the array Mi, i.e all_sA[i]+all_sB[i] = d 
+// size of M and all_M is d*N 
 __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
     
     int tidx = threadIdx.x%d; // to know which element of the below-array the thead treats
@@ -171,7 +176,7 @@ __global__ void mergeSmallBatch_k_shared(int *__restrict__ all_M,int *M,int *all
 
 // function SortSmallBatch_k takes a big array all_M containing (Ai and Bi) like this : all_M = (A1|B1|...|AN|BN)
 // it returns M the array of all_M with arrays Ai and Bi merge and sort
-// si is the size of the arrays A and B (we fixed |A|=|B|)
+// si is the size of the arrays Ai and Bi (we fixed |Ai|=|Bi|) all Ai and Bi have the same size
 __global__ void SortSmallBatch_k(int *__restrict__ all_M,int *M,int si,int d){
     int tidx = threadIdx.x%d;
     int Qt = (threadIdx.x-tidx)/d;

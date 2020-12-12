@@ -301,7 +301,7 @@ __device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int
 }
 
 
-
+//_______________________________________________________________________Question 2____________________________________________________________________________________________________
 
 __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
     // try blocks of 32-64 thread to load in shared only on give the result
