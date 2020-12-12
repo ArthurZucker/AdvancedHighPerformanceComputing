@@ -18,7 +18,14 @@ order to asses the performances
 using namespace std;
 // modified at home 
 __device__ void merged_path_seq_device(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b){
-	int m = a+b;
+    /**
+    * Sequential merge using the code from the article
+    * @param A an array of ints to merge with @param B into @param M
+    * @param a @param b respective sizes of the arrays
+    * @see main()
+    * @return Nothing, M is sorted in place
+    */
+    int m = a+b;
 	int i = 0;
 	int j = 0;
 	while(i+j<m){
@@ -186,12 +193,13 @@ __global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restric
 // zerocopy
 __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int sA, const int sB, const int sM){
     /**
-    * A brief description. A more elaborate class description
+    * Parallel merge of two sorted arrays
     * @param A an array of ints to merge with @param B into @param M
-    * @param sA,sB,sM respective sizes of the arrays
+    * @param sA, @param sB, @param sM respective sizes of the arrays
     * @see main()
     * @return Nothing, M is sorted in place
     */
+
     int i = threadIdx.x;
     if(i<sM){
         int2 K;
