@@ -374,8 +374,9 @@ __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__res
 }
 
 
-void sort_array( int *__restrict__  hD, int *__restrict__  hsD,const int sizeM,const int tpb){
-    for(int i=1;i<sizeM;i*=2){
+void sort_array( int   *hD, int   *hsD,const int sizeM,const int tpb){
+    int i;
+    for( i=1;i<sizeM;i*=2){
         int *__restrict__ path;
         int nblocks = (2*i+tpb-1)/tpb ;
         cudaMalloc((void **)&path,2*(nblocks+1)*sizeof(int));
@@ -395,7 +396,4 @@ void sort_array( int *__restrict__  hD, int *__restrict__  hsD,const int sizeM,c
         hsD = ht;
         cudaFree(path);
     }
-    int *ht = hD;   
-    hD = hsD;
-    hsD = ht;
 }

@@ -248,16 +248,16 @@ int main(int argc, char* argv[]) {
     //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
     printf("__________________ sort M __________________\n");
     int threads_per_blocks = 128;
-    for(int d=2;d<65536;d*=2){
+    for(int d=2;d<262144*2*2;d*=4){
         testCUDA(cudaMalloc((void **)&hsD,d*sizeof(int)));
-        testCUDA(cudaMalloc((void **)&hD,d*sizeof(int)));
+        testCUDA(cudaMalloc((void **)&hD ,d*sizeof(int)));
         
         //code to launch on a size != than a power of 2
         if(d != 0 && (d & (d-1)) == 0){
             //printf("|M| is a power of 2\n");
             D  = (int *) malloc(d*sizeof(int));
             sD = (int *) malloc(d*sizeof(int));
-            for(int i=0;i<d;i++){D[i]=rand()%d*5+1;}
+            for(int i=0;i<d;i++){D[i]=rand()%d*50+1;}
         }
         else{
             //printf("|M| was not a power of 2, it will be changed\n");
@@ -271,6 +271,7 @@ int main(int argc, char* argv[]) {
             padding = power-d;
             d = power;
         }
+        
         // printf("Assigning M\n");  
         testCUDA(cudaMemcpy(hD, D, d*sizeof(int), cudaMemcpyHostToDevice));
         testCUDA(cudaEventRecord(start,0));
@@ -278,7 +279,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventRecord(stop,0));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-        printf("d = %10d | t =  %2.10f ms | ",d,TimeVar);
+        printf("d = %10d | t =  %4.10f ms | ",d,TimeVar);
         testCUDA(cudaMemcpy(sD, hsD, d*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<" Sorted : "<<is_sorted(sD,d);
         //____________________Compare with qsort ________________________
