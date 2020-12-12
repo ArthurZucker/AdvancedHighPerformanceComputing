@@ -387,7 +387,7 @@ void sort_array( int *__restrict__  hD, int *__restrict__  hsD,const int sizeM,c
                 merged_Big_k<<<nblocks,tpb>>>(&hD[j],&hD[j+i],&hsD[j],path,2*i);
             }
             else{
-                mergedSmall_k_ldg<<<1,2*i>>>(&hD[j],&hD[j+i],&hsD[j],i,i,2*i);
+                mergedSmall_k<<<1,2*i>>>(&hD[j],&hD[j+i],&hsD[j],i,i,2*i);
             }
         }
         int *ht = hD;   

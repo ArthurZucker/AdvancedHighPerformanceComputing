@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
     //int nb_threads = 128; // changing it might be smart
     //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
     printf("__________________ sort M __________________\n");
-    int threads_per_blocks = 1024;
+    int threads_per_blocks = 128;
     for(int d=2;d<65536;d*=2){
         testCUDA(cudaMalloc((void **)&hsD,d*sizeof(int)));
         testCUDA(cudaMalloc((void **)&hD,d*sizeof(int)));
@@ -278,7 +278,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventRecord(stop,0));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-        printf("d = %10d | t =  %2.2f ms | ",d,TimeVar);
+        printf("d = %10d | t =  %2.10f ms | ",d,TimeVar);
         testCUDA(cudaMemcpy(sD, hsD, d*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<" Sorted : "<<is_sorted(sD,d);
         //____________________Compare with qsort ________________________
