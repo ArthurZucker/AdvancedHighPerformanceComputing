@@ -221,6 +221,9 @@ __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ 
     }
 }
 
+
+//_______________________________________________________________________Question 2____________________________________________________________________________________________________
+
 __device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
     // each block will launch this one 
     // try window of 64 + shared memory (blokcs of 32) 
@@ -300,9 +303,6 @@ __device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int
     }
 }
 
-
-//_______________________________________________________________________Question 2____________________________________________________________________________________________________
-
 __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
     // try blocks of 32-64 thread to load in shared only on give the result
     
@@ -364,10 +364,6 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
     if(blockDim.x*blockIdx.x+threadIdx.x < m) merged_k(&A[  path[2*i]  ],&B[  path[(2*i)+1]  ], &M[  blockDim.x*blockIdx.x ],    path[  2*(i+1)  ] - path[2*i]     ,    path[2*(i+1)+1] - path[2*i+1]    ,   path[2*(i+1)] - path[2*i]+ path[2*(i+1)+1] - path[2*i+1]     );
 }
 
-// all thread will do a simple diagonal search
-__global__ void pathBig_k_naive (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
-    
-}
 
 __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
     // each thread will use sequentiel merge on his path
@@ -378,3 +374,28 @@ __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__res
 }
 
 
+void sort_array( int *__restrict__  hD, int *__restrict__  hsD,const int sizeM,const int tpb){
+    for(int i=1;i<sizeM;i*=2){
+        int *__restrict__ path;
+        int nblocks = (2*i+tpb-1)/tpb ;
+        cudaMalloc((void **)&path,2*(nblocks+1)*sizeof(int));
+        for(int j=0;j<sizeM;j+=2*i){
+                
+            if(i>512){  // or simply 1024
+                
+                pathBig_k   <<<nblocks,tpb>>>(&hD[j],&hD[j+i],path,i,i,2*i);
+                merged_Big_k<<<nblocks,tpb>>>(&hD[j],&hD[j+i],&hsD[j],path,2*i);
+            }
+            else{
+                mergedSmall_k_ldg<<<1,2*i>>>(&hD[j],&hD[j+i],&hsD[j],i,i,2*i);
+            }
+        }
+        int *ht = hD;   
+        hD = hsD;
+        hsD = ht;
+        cudaFree(path);
+    }
+    int *ht = hD;   
+    hD = hsD;
+    hsD = ht;
+}

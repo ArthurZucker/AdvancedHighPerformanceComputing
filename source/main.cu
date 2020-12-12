@@ -15,7 +15,7 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 6
+#define QUESTION 3
 #define INFO 0
 /*
 TO DO :
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
     for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
     #endif
-    #if QUESTION==3 || QUESTION == 5
+    #if QUESTION == 5
     int sizeM;
     if (argc < 2) {sizeM = rand()%1024;} 
     if (argc == 2) {sizeM=atoi(argv[1]);} // If no arguments are provided, set random sizes
@@ -129,19 +129,22 @@ int main(int argc, char* argv[]) {
 
 
     
+
+    
+
     //____________________________________________
 
-    //___________ Shared _________________________
-    printf("________________ Shared ___________________\n");
-    testCUDA(cudaEventRecord(start));
-    mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
-    //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
-    testCUDA(cudaEventRecord(stop));
+    
+
+    //___________ zerocopy _______________________
+    printf("_______________ zero copy ___________________\n");
+    testCUDA(cudaEventRecord(start,0));
+    mergedSmall_k<<<1,1024>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
+    testCUDA(cudaEventRecord(stop,0));
     testCUDA(cudaEventSynchronize(stop));
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-
     //____________________________________________
 
     //___________ texture ________________________
@@ -153,19 +156,6 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-
-    //____________________________________________
-
-    //___________ zerocopy _______________________
-    printf("_______________ zero copy ___________________\n");
-    testCUDA(cudaEventRecord(start,0));
-    mergedSmall_k<<<1,1024>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
-    testCUDA(cudaEventRecord(stop,0));
-    testCUDA(cudaEventSynchronize(stop));
-    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    printf("elapsed time : %f ms\n",TimeVar);
-    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-
     //____________________________________________
 
     //___________ LDG ____________________________
@@ -179,6 +169,19 @@ int main(int argc, char* argv[]) {
     cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
     for(int i=1;i<sizeA;i++){hostM[i]=0;}
+
+    //___________ Shared _________________________
+    printf("________________ Shared ___________________\n");
+    testCUDA(cudaEventRecord(start));
+    mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
+    //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
+    testCUDA(cudaEventRecord(stop));
+    testCUDA(cudaEventSynchronize(stop));
+    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+    printf("elapsed time : %f ms\n",TimeVar);
+    cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
+    //____________________________________________
+
     
     #endif
 
@@ -214,86 +217,6 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
     cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
     //print_t(hostM,sizeM);
-    //____________________________________________
-    #endif
-
-    //___________________________Question 3_________________________________
-    #if QUESTION==3
-    int *__restrict__ hD;
-    int *__restrict__ hsD;
-    int *D  ;
-    int *sD ;
-    int padding = 0;
-
-    if(sizeM != 0 && (sizeM & (sizeM-1)) == 0){
-        printf("|M| is a power of 2\n");
-        D  = (int *) malloc(sizeM*sizeof(int));
-        sD = (int *) malloc(sizeM*sizeof(int));
-        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
-    }
-    else{
-        printf("|M| was not a power of 2, it will be changed\n");
-        int power = 1;
-        while(power < sizeM) power*=2;
-        printf("new |M| with padding : %d\n",power);
-        D  = (int *) malloc(power*sizeof(int));
-        sD = (int *) malloc(power*sizeof(int));
-        for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
-        for(int i = sizeM;i<power;i++){D[i] = ( int) -1 >> 1;}
-        padding = power-sizeM;
-        sizeM = power;
-    }
-    printf("Assigning M\n");
-    
-    //int nb_threads = 128; // changing it might be smart
-    //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
-    printf("__________________ sort M __________________\n");
-    
-    //if(sizeM<1024) nb_blocks=1024;
-    testCUDA(cudaMalloc((void **)&hsD,sizeM*sizeof(int)));
-    testCUDA(cudaMalloc((void **)&hD,sizeM*sizeof(int)));
-    testCUDA(cudaMemcpy(hD, D, sizeM*sizeof(int), cudaMemcpyHostToDevice));
-    testCUDA(cudaEventRecord(start,0));
-    for(int i=1;i<sizeM;i*=2){
-        for(int j=0;j<sizeM;j+=2*i){
-            
-            if(i>512){
-                int *__restrict__ path;
-                int nblocks = (2*i+1023)/1024 ;
-                //exit(0);
-                testCUDA(cudaMalloc((void **)&path,2*(nblocks+1)*sizeof(int)));
-                pathBig_k   <<<nblocks,1024>>>(&hD[j],&hD[j+i],path,i,i,2*i);
-                merged_Big_k<<<nblocks,1024>>>(&hD[j],&hD[j+i],&hsD[j],path,2*i);
-            }
-            else{
-                mergedSmall_k_ldg<<<1,2*i>>>(&hD[j],&hD[j+i],&hsD[j],i,i,2*i);
-                //cout<<"Check sorted : "<<is_sorted(&hsD[j],i)<<endl;
-                
-            }
-        }
-        int *ht = hD;   
-        hD = hsD;
-        hsD = ht;
-    }
-    int *ht = hD;   
-    hD = hsD;
-    hsD = ht;
-    testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
-    //print_t(&sD[padding],sizeM-padding);
-    testCUDA(cudaEventRecord(stop,0));
-    testCUDA(cudaEventSynchronize(stop));
-    testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
-    printf("elapsed time : %f ms\n",TimeVar);
-    cout<<"Check sorted : "<<is_sorted(&sD[padding],sizeM-padding)<<endl;
-    //____________________________________________
-    clock_t begin = clock();
-    qsort(D, sizeM, sizeof(int), cmpfunc);
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("elapsed time : %f ms\n",time_spent*1000);
-    cout<<"Check sorted : "<<is_sorted(D,sizeM)<<endl;
-    
     // printf("__________________ Path big NAIVE __________________\n");
     // testCUDA(cudaEventRecord(start,0));
     // pathBig_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,path,sizeA,sizeB,sizeM);
@@ -311,6 +234,74 @@ int main(int argc, char* argv[]) {
     // printf("elapsed time : %f ms\n",TimeVar);
     // cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
     //____________________________________________
+    //____________________________________________
+    #endif
+
+    //___________________________Question 3_________________________________
+    #if QUESTION==3
+    int *__restrict__ hD;
+    int *__restrict__ hsD;
+    int *D  ;
+    int *sD ;
+    int padding = 0;
+    //int nb_threads = 128; // changing it might be smart
+    //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
+    printf("__________________ sort M __________________\n");
+    int threads_per_blocks = 1024;
+    for(int d=2;d<65536;d*=2){
+        testCUDA(cudaMalloc((void **)&hsD,d*sizeof(int)));
+        testCUDA(cudaMalloc((void **)&hD,d*sizeof(int)));
+        
+        //code to launch on a size != than a power of 2
+        if(d != 0 && (d & (d-1)) == 0){
+            //printf("|M| is a power of 2\n");
+            D  = (int *) malloc(d*sizeof(int));
+            sD = (int *) malloc(d*sizeof(int));
+            for(int i=0;i<d;i++){D[i]=rand()%d*5+1;}
+        }
+        else{
+            //printf("|M| was not a power of 2, it will be changed\n");
+            int power = 1;
+            while(power < d) power*=2;
+            //printf("new |M| with padding : %d\n",power);
+            D  = (int *) malloc(power*sizeof(int));
+            sD = (int *) malloc(power*sizeof(int));
+            for(int i=0;i<d;i++){D[i]=rand()%d*5+1;}
+            for(int i = d;i<power;i++){D[i] = ( int) -1 >> 1;}
+            padding = power-d;
+            d = power;
+        }
+        // printf("Assigning M\n");  
+        testCUDA(cudaMemcpy(hD, D, d*sizeof(int), cudaMemcpyHostToDevice));
+        testCUDA(cudaEventRecord(start,0));
+        sort_array(hD,hsD,d,threads_per_blocks);
+        testCUDA(cudaEventRecord(stop,0));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("d = %10d | t =  %2.2f ms | ",d,TimeVar);
+        testCUDA(cudaMemcpy(sD, hsD, d*sizeof(int), cudaMemcpyDeviceToHost));
+        cout<<" Sorted : "<<is_sorted(sD,d);
+        //____________________Compare with qsort ________________________
+        clock_t begin = clock();
+        qsort(D, d, sizeof(int), cmpfunc);
+        clock_t end = clock();
+        double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+        printf("\tquicksort t = %f ms | ",time_spent*1000);
+        int sorted = 1;
+        for(int i=0;i<d;i++) {
+            if(D[i]!=sD[i]){
+                printf("ERROR    i=%d : %d != %d\n",i,D[i],sD[i]);
+                sorted = 0;
+                break;
+            }
+        }
+        if(sorted) printf("arrays are equal\n");
+        cudaFree(hD);
+        cudaFree(hsD);
+        free(D);
+        free(sD);
+    }
+    
     #endif
   
     
@@ -843,17 +834,15 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf(" d = %10d : %10.8f ms\n",2*i,TimeVar);
         total_time+=TimeVar;
-        int *ht = hD;   
-        hD = hsD;
-        hsD = ht;
-
+        // int *ht = hD;   
+        // hD = hsD;
+        // hsD = ht;
+        testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
+        printf("\nTotal elapsed time : %f ms\n",total_time);
     }
+    
 
-    int *ht = hD;   
-    hD = hsD;
-    hsD = ht;
-    testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
-    printf("\nTotal elapsed time : %f ms\n",total_time);
+
     #endif
     /*
 
