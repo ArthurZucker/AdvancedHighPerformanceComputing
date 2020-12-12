@@ -15,6 +15,13 @@ that merges two by two, for each i, Ai and Bi.
 #include "batch_merge.h"
 
 
+/**
+ * @file merge.cu
+ * @author Arthur Zucker & Clément Apavou  
+ * @date 12 Dec 2020
+ * @brief contains all batch-merge kernels
+ */
+
 __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
     
     /**
