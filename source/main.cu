@@ -35,7 +35,7 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 5   /**< Choose from {1,2,3,4,5} depending on the question */
+#define QUESTION 1  /**< Choose from {1,2,3,4,5} depending on the question */
 #define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
 
@@ -146,8 +146,9 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){hostM[i]=0;}
 
         //___________ Zero copy Shared _________________________
         printf("________________ Zero copy Shared ___________________\n");
@@ -158,8 +159,9 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){hostM[i]=0;}
 
         //___________ Zero copy LDG ____________________________
         printf("_____________________ Zero copy LDG ___________________\n");
@@ -172,6 +174,8 @@ int main(int argc, char* argv[]) {
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
 
+        for(int i=0;i<sizeM;i++){hostM[i]=0;}
+
         //___________ Texture ________________________
         printf("________________ Texture ___________________\n");
         testCUDA(cudaEventRecord(start,0));
@@ -182,8 +186,6 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
-
-        for(int i=1;i<sizeA;i++){hostM[i]=0;}
         
         //_____________________________ Copy ______________________________________________________________
         printf("__________________________Copy________________________________\n");
@@ -196,8 +198,9 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         testCUDA(cudaMemcpy(M, thostM, sizeM*sizeof(int), cudaMemcpyDeviceToHost)); // retrieve M on the device
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){M[i]=0;}
 
         //___________ copy Shared _________________________
         printf("________________copy Shared ___________________\n");
@@ -209,8 +212,9 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         testCUDA(cudaMemcpy(M, thostM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){M[i]=0;}
 
         //___________ copy LDG ____________________________
         printf("_____________________copy LDG ___________________\n");
@@ -461,7 +465,9 @@ int main(int argc, char* argv[]) {
         else{
             printf("There is a table not sorted !\n");
         }
-        
+
+        for(int i=0;i<d;i++){host_all_STM[i]=0;}
+
         printf("_________________ Shared_____________________\n");
 
         numBlocks = N; //big number
@@ -489,6 +495,8 @@ int main(int argc, char* argv[]) {
             printf("There is a table not sorted !\n");
         }
 
+        for(int i=0;i<d;i++){host_all_STM[i]=0;}
+
         printf("_________________ Normal_____________________\n");
 
         numBlocks = N; //big number
@@ -515,7 +523,6 @@ int main(int argc, char* argv[]) {
         else{
             printf("There is a table not sorted !\n");
         }
-
 
         // ________________________________________Copy______________________________________________ 
 
@@ -618,6 +625,8 @@ int main(int argc, char* argv[]) {
             printf("All table are sorted !\n");
         }
 
+        for(int i=0;i<d;i++){all_STM[i]=0;}
+
         printf("_________________ Shared_____________________\n");
 
         numBlocks = N; //big number
@@ -645,6 +654,8 @@ int main(int argc, char* argv[]) {
         else{
             printf("There is a table not sorted !\n");
         }
+
+        for(int i=0;i<d;i++){all_STM[i]=0;}
 
         printf("_________________ Normal_____________________\n");
 
