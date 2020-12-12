@@ -1,10 +1,10 @@
 /**
- * @file merge.cu
+ * @file utils.cu
  * @author Arthur Zucker & Clément Apavou  
  * @date 12 Dec 2020
  * @brief contains all usefull non-kernel function
  */
- 
+
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>

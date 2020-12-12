@@ -16,7 +16,7 @@ that merges two by two, for each i, Ai and Bi.
 
 
 /**
- * @file merge.cu
+ * @file batch_merge.cu
  * @author Arthur Zucker & Clément Apavou  
  * @date 12 Dec 2020
  * @brief contains all batch-merge kernels
