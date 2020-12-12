@@ -100,7 +100,6 @@ int main(int argc, char* argv[]) {
 
     //___________________________ Question 1 _________________________________
     #if QUESTION == 1
-        //___________ TO DO: explain texture memory ___________
         // Copy 
         testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
         testCUDA(cudaMalloc((void **)&thostB,sizeB*sizeof(int)));
@@ -125,10 +124,7 @@ int main(int argc, char* argv[]) {
         // via mapped pinned memory or host->device transfers.
 
         testCUDA(cudaHostAlloc(&hostM,sizeM*sizeof(int),cudaHostAllocMapped)); // in order to do zero copy
-        /*testCUDA(cudaHostGetDevicePointer((void **)&pM, (void *) hostM,0));
-        testCUDA(cudaHostGetDevicePointer((void **)&pA, (void *) hostA,0));
-        testCUDA(cudaHostGetDevicePointer((void **)&pB, (void *) hostB,0));
-        */
+ 
         //_______________ Sequential _________________
         printf("_______________ Sequential _________________\n");
         clock_t begin = clock();
@@ -157,7 +153,6 @@ int main(int argc, char* argv[]) {
         printf("________________ Zero copy Shared ___________________\n");
         testCUDA(cudaEventRecord(start));
         mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
-        //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
         testCUDA(cudaEventRecord(stop));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -208,7 +203,6 @@ int main(int argc, char* argv[]) {
         printf("________________copy Shared ___________________\n");
         testCUDA(cudaEventRecord(start));
         mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(thostA,thostB,thostM,sizeA,sizeB,sizeM);
-        //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
         testCUDA(cudaEventRecord(stop));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -272,7 +266,7 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
-        //print_t(hostM,sizeM);
+
         // printf("__________________ Path big NAIVE __________________\n");
         // testCUDA(cudaEventRecord(start,0));
         // pathBig_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,path,sizeA,sizeB,sizeM);

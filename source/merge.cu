@@ -419,7 +419,7 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
     }
 }
 
-__global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, const int *__restrict__ path, const int m){
+__global__ void merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, const int *__restrict__ path, const int m){
     /**
     * Merge two arrays from a given path.
     * @param A an array of ints to merge with @param B into @param M
@@ -442,7 +442,7 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
     if(blockDim.x*blockIdx.x+threadIdx.x < m) merged_k(&A[  path[2*i]  ],&B[  path[(2*i)+1]  ], &M[  blockDim.x*blockIdx.x ],    path[  2*(i+1)  ] - path[2*i]     ,    path[2*(i+1)+1] - path[2*i+1]    ,   path[2*(i+1)] - path[2*i]+ path[2*(i+1)+1] - path[2*i+1]     );
 }
 
-__global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
+__global__ void merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
      /**
     * Naive Merge two arrays from a given path.
     * @param A an array of ints to merge with @param B into @param M

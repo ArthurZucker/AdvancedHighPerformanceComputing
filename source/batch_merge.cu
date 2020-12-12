@@ -25,7 +25,7 @@ that merges two by two, for each i, Ai and Bi.
 __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
     
     /**
-    * takes a big array @param all_M containing (Ai and Bi) suach as all_M = (A1|B1|...|AN|BN)
+    * takes a big array @param all_M containing (Ai and Bi) such as all_M = (A1|B1|...|AN|BN)
     * @param all_sA contains all size of different A (all_sA[0] = |A0|)
     * @param all_sB contains all size of different B (all_sB[0] = |B0|)
     * @return Nothing, each sub array is sorted
