@@ -6,9 +6,9 @@
  ****************************************************************************/
 
 /**
- * @file doxygen_c.h
+ * @file main.cu
  * @author Arthur Zucker & Clément Apavou  
- * @date 912 Dec 2020
+ * @date 12 Dec 2020
  * @brief Main file used to produce results for each questions
  *
  * In this porject, we tackled the MERGE SORT problem on GPU
@@ -35,7 +35,7 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 4  /**< Choose from {1,2,3,4,5} depending on the question */
+#define QUESTION 4   /**< Choose from {1,2,3,4,5} depending on the question */
 #define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
 

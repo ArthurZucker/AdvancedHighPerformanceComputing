@@ -1,3 +1,10 @@
+/**
+ * @file utils.cu
+ * @author Arthur Zucker & Clément Apavou  
+ * @date 12 Dec 2020
+ * @brief contains all usefull non-kernel function
+ */
+
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +17,10 @@
 #include <time.h>
 
 using namespace std;
-// print error of cuda
 void testCUDA(cudaError_t error, const char *file, int line)  {
+    /**
+    * CUDA provided error verifier
+    */
 	if (error != cudaSuccess) {
 	   printf("There is an error in file %s at line %d\n", file, line);
        printf("%s\n",cudaGetErrorString(error));
@@ -21,6 +30,15 @@ void testCUDA(cudaError_t error, const char *file, int line)  {
 
 // check if the table seqM of size sizeM is sorted
 int is_sorted(const int *seqM,const int sizeM){
+    /**
+    * Checks if an array is sorted
+    * @param seqM is an array
+    * @param sizeM is its size
+    * @return 0 if not sorted, 1 if sorted
+    * @note this function prints different information to check whether 
+    * M is actually sorted or empty, and if it is empty it will show from where to where
+    * If the array is not sorted, it keep on searching, in order to know if only half of it is sorted or not
+    */
     int sorted =1;
     for(int i=0;i<sizeM-1;i++){
         if(seqM[i+1]<seqM[i]){
@@ -38,13 +56,20 @@ int is_sorted(const int *seqM,const int sizeM){
     
 }
 
-// used in the quicksort function
 int cmpfunc (const void * a, const void * b) {
+    /**
+    * Comparison function used for quick sort
+    */
     return ( *(int*)a - *(int*)b );
  }
  
-// print the table seqM of size sizeM is sorted
+
 void print_t(const int *seqM,const int sizeM){
+    /**
+    * Prints the content of an array
+    * @param seqM is an array
+    * @param sizeM is its size
+    */
     cout<<"[";
     for (int i = 0; i <sizeM-1; i++) 
         cout << seqM[i] << ',';

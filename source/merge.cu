@@ -16,7 +16,16 @@ order to asses the performances
 #include "merge.h"
 #define VERBOSE 0
 using namespace std;
-// modified at home 
+
+
+/**
+ * @file merge.cu
+ * @author Arthur Zucker & Clément Apavou  
+ * @date 12 Dec 2020
+ * @brief contains all merge kernels
+ */
+
+
 __device__ void merged_path_seq_device(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b){
     /**
     * Sequential merge using the code from the article

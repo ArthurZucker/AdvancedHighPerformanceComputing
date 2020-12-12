@@ -14,15 +14,26 @@ that merges two by two, for each i, Ai and Bi.
 #include <time.h>
 #include "batch_merge.h"
 
-// function mergeSmallBatch_k takes a big array all_M containing (Ai and Bi) like this : all_M = (A1|B1|...|AN|BN)
-// it returns M the array of all_M with arrays Ai and Bi merge and sort
-// all_sA contains all size of different A (all_sA[0]= |A0|)
-// all_sB contains all size of different B (all_sB[0]= |B0|)
-// we stocked sizes of Ai and Bi because |Ai|!=|Bi| and |Ai| and |Bi| not constant
-// d is the number of element that there is in the array Mi, i.e all_sA[i]+all_sB[i] = d 
-// size of M and all_M is d*N 
+
+/**
+ * @file batch_merge.cu
+ * @author Arthur Zucker & Clément Apavou  
+ * @date 12 Dec 2020
+ * @brief contains all batch-merge kernels
+ */
+
 __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
     
+    /**
+    * takes a big array @param all_M containing (Ai and Bi) suach as all_M = (A1|B1|...|AN|BN)
+    * @param all_sA contains all size of different A (all_sA[0] = |A0|)
+    * @param all_sB contains all size of different B (all_sB[0] = |B0|)
+    * @return Nothing, each sub array is sorted
+    * @note we stored sizes of Ai and Bi because |Ai|!=|Bi| and |Ai| and |Bi| not constant
+    * d is the number of element that there is in the array Mi, i.e all_sA[i]+all_sB[i] = d 
+    * size of M and all_M is d*N 
+    */
+
     int tidx = threadIdx.x%d; // to know which element of the sub-array the thread treats
     int Qt = (threadIdx.x-tidx)/d;
     int gbx = Qt + blockIdx.x*(blockDim.x/d);// which array it treats
@@ -73,6 +84,10 @@ __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, in
 
 // mergeSmallBatch using ldg 
 __global__ void mergeSmallBatch_k_ldg(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
+    /**
+    * @see mergeSmallBatch_k(), does the same with ldg
+    */
+
     int tidx = threadIdx.x%d;
     int Qt = (threadIdx.x-tidx)/d;
     int gbx = Qt + blockIdx.x*(blockDim.x/d);
@@ -121,6 +136,11 @@ __global__ void mergeSmallBatch_k_ldg(int *__restrict__ all_M,int *M,int *all_sA
 
 // mergeSmallBatch using shared memory 
 __global__ void mergeSmallBatch_k_shared(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
+
+    /**
+    * @see mergeSmallBatch_k(), does the same using shared memory
+    */
+
     int tidx = threadIdx.x%d;
     int Qt = (threadIdx.x-tidx)/d;
     int gbx = Qt + blockIdx.x*(blockDim.x/d);

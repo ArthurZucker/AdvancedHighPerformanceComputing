@@ -1,0 +1,87 @@
+\hypertarget{utils_8cu}{}\doxysection{utils.\+cu File Reference}
+\label{utils_8cu}\index{utils.cu@{utils.cu}}
+
+
+contains all usefull non-\/kernel function  
+
+
+{\ttfamily \#include \char`\"{}utils.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$iterator$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{utils_8cu_a3f1cb4a91c01fbf7dabf8c91e5cfaced}{test\+C\+U\+DA}} (cuda\+Error\+\_\+t error, const char $\ast$file, int line)
+\item 
+int \mbox{\hyperlink{utils_8cu_ad26bca0ba2d977aa11f67494a134cb50}{is\+\_\+sorted}} (const int $\ast$seqM, const int sizeM)
+\item 
+int \mbox{\hyperlink{utils_8cu_a4ffbd7d116c633fda2c1957ca42cadb9}{cmpfunc}} (const void $\ast$a, const void $\ast$b)
+\item 
+void \mbox{\hyperlink{utils_8cu_a26b647b602b293ce0d828bbefe9f3e95}{print\+\_\+t}} (const int $\ast$seqM, const int sizeM)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+contains all usefull non-\/kernel function 
+
+\begin{DoxyAuthor}{Author}
+Arthur Zucker \& Clément Apavou ~\newline
+ 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+12 Dec 2020 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{utils_8cu_a4ffbd7d116c633fda2c1957ca42cadb9}\label{utils_8cu_a4ffbd7d116c633fda2c1957ca42cadb9}} 
+\index{utils.cu@{utils.cu}!cmpfunc@{cmpfunc}}
+\index{cmpfunc@{cmpfunc}!utils.cu@{utils.cu}}
+\doxysubsubsection{\texorpdfstring{cmpfunc()}{cmpfunc()}}
+{\footnotesize\ttfamily int cmpfunc (\begin{DoxyParamCaption}\item[{const void $\ast$}]{a,  }\item[{const void $\ast$}]{b }\end{DoxyParamCaption})}
+
+Comparison function used for quick sort\mbox{\Hypertarget{utils_8cu_ad26bca0ba2d977aa11f67494a134cb50}\label{utils_8cu_ad26bca0ba2d977aa11f67494a134cb50}} 
+\index{utils.cu@{utils.cu}!is\_sorted@{is\_sorted}}
+\index{is\_sorted@{is\_sorted}!utils.cu@{utils.cu}}
+\doxysubsubsection{\texorpdfstring{is\_sorted()}{is\_sorted()}}
+{\footnotesize\ttfamily int is\+\_\+sorted (\begin{DoxyParamCaption}\item[{const int $\ast$}]{seqM,  }\item[{const int}]{sizeM }\end{DoxyParamCaption})}
+
+Checks if an array is sorted 
+\begin{DoxyParams}{Parameters}
+{\em seqM} & is an array \\
+\hline
+{\em sizeM} & is its size \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 if not sorted, 1 if sorted 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+this function prints different information to check whether M is actually sorted or empty, and if it is empty it will show from where to where If the array is not sorted, it keep on searching, in order to know if only half of it is sorted or not
+\end{DoxyNote}
+\mbox{\Hypertarget{utils_8cu_a26b647b602b293ce0d828bbefe9f3e95}\label{utils_8cu_a26b647b602b293ce0d828bbefe9f3e95}} 
+\index{utils.cu@{utils.cu}!print\_t@{print\_t}}
+\index{print\_t@{print\_t}!utils.cu@{utils.cu}}
+\doxysubsubsection{\texorpdfstring{print\_t()}{print\_t()}}
+{\footnotesize\ttfamily void print\+\_\+t (\begin{DoxyParamCaption}\item[{const int $\ast$}]{seqM,  }\item[{const int}]{sizeM }\end{DoxyParamCaption})}
+
+Prints the content of an array 
+\begin{DoxyParams}{Parameters}
+{\em seqM} & is an array \\
+\hline
+{\em sizeM} & is its size\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{utils_8cu_a3f1cb4a91c01fbf7dabf8c91e5cfaced}\label{utils_8cu_a3f1cb4a91c01fbf7dabf8c91e5cfaced}} 
+\index{utils.cu@{utils.cu}!testCUDA@{testCUDA}}
+\index{testCUDA@{testCUDA}!utils.cu@{utils.cu}}
+\doxysubsubsection{\texorpdfstring{testCUDA()}{testCUDA()}}
+{\footnotesize\ttfamily void test\+C\+U\+DA (\begin{DoxyParamCaption}\item[{cuda\+Error\+\_\+t}]{error,  }\item[{const char $\ast$}]{file,  }\item[{int}]{line }\end{DoxyParamCaption})}
+
+C\+U\+DA provided error verifier
