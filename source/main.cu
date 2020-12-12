@@ -15,7 +15,7 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 3
+#define QUESTION 5
 #define INFO 0
 /*
 TO DO :
@@ -289,6 +289,8 @@ int main(int argc, char* argv[]) {
     //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
     printf("__________________ sort M __________________\n");
     int threads_per_blocks = 128;
+    FILE *f = fopen("../results/results3.csv", "w"); 
+    fprintf(f, "d,time\n");
     for(int d=2;d<262144*2*2;d*=4){
         testCUDA(cudaMalloc((void **)&hsD,d*sizeof(int)));
         testCUDA(cudaMalloc((void **)&hD ,d*sizeof(int)));
@@ -321,6 +323,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("d = %10d | t =  %4.10f ms | ",d,TimeVar);
+        fprintf(f, "%d,%f\n",d,TimeVar);
         testCUDA(cudaMemcpy(sD, hsD, d*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<" Sorted : "<<is_sorted(sD,d);
         //____________________Compare with qsort ________________________
@@ -343,7 +346,7 @@ int main(int argc, char* argv[]) {
         free(D);
         free(sD);
     }
-    
+    fclose(f); 
     #endif
   
     
@@ -711,7 +714,7 @@ int main(int argc, char* argv[]) {
     // _________________________Question 5____________________________________
     // We choose to use copy because it's faster than zero copy
     #if QUESTION == 5
-    FILE *f = fopen("../results/results.csv", "w"); 
+    FILE *f = fopen("../results/results5.csv", "w"); 
     fprintf(f, "N,d,time\n");
     // test for several value of N and d
     for(int N = 10; N<1000000; N*=10){//10000000 max 
