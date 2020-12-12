@@ -834,67 +834,6 @@ int main(int argc, char* argv[]) {
     }
     fclose(f); 
     #endif
-    // //___________________________Question 5_________________________________
-
-    // // We choose to use copy because it's faster than zero copy
-    // #if QUESTION == 5
-    // int *D  ;// table D containing  D = (A1|B1|...|AN|BN) 
-    // int *sD ;// table sD containing  D = (A1|B1|...|AN|BN) with Di sorted i.e (Ai and Bi merged and sorted) 
-    // int *__restrict__ hD; // D on device
-    // int *__restrict__ hsD; // sD on device 
-    // int padding = 0;
-
-    // // sizeM on the top of the code
-    // if(sizeM != 0 && (sizeM & (sizeM-1)) == 0){
-    //     printf("|M| is a power of 2\n");
-    //     D  = (int *) malloc(sizeM*sizeof(int)); 
-    //     sD = (int *) malloc(sizeM*sizeof(int));
-    //     for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}// initialisation of D
-    // }
-    // else{
-    //     printf("|M| was not a power of 2, it will be changed\n");
-    //     int power = 1;
-    //     while(power < sizeM) power*=2;
-    //     printf("new |M| with padding : %d\n",power);
-    //     D  = (int *) malloc(power*sizeof(int));
-    //     sD = (int *) malloc(power*sizeof(int));
-    //     for(int i=0;i<sizeM;i++){D[i]=rand()%sizeM*5+1;}
-    //     for(int i = sizeM;i<power;i++){D[i] = ( int) -1 >> 1;}// initialisation of D
-    //     padding = power-sizeM;
-    //     sizeM = power;
-    // }
-    // printf("Assigning M\n");
-    // // for(int i = 0;i<sizeM;i++) printf("D[%d]=%d\n",i,D[i]);
-
-    // printf("Computing time : \n");
-    // testCUDA(cudaMalloc((void **)&hsD,sizeM*sizeof(int)));
-    // testCUDA(cudaMalloc((void **)&hD,sizeM*sizeof(int)));
-    // testCUDA(cudaMemcpy(hD, D, sizeM*sizeof(int), cudaMemcpyHostToDevice));
-    // float total_time = 0;
-    // // execution for different d 
-    // for(int i=1;i<=512;i*=2){
-
-    //     int threadsPerBlock = 2*i; 
-    //     int numBlocks = sizeM/threadsPerBlock; 
-    //     testCUDA(cudaEventRecord(start));
-    //     SortSmallBatch_k_ldg<<<numBlocks,threadsPerBlock>>>(hD,hsD,i,2*i);
-    //     testCUDA(cudaEventRecord(stop));
-    //     testCUDA(cudaEventSynchronize(stop));
-    //     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-    //     printf(" d = %10d : %10.8f ms\n",2*i,TimeVar);
-    //     total_time+=TimeVar;
-    //     int *ht = hD;   
-    //     hD = hsD;
-    //     hsD = ht;
-
-    // }
-
-    // int *ht = hD;   
-    // hD = hsD;
-    // hsD = ht;
-    // testCUDA(cudaMemcpy(sD, hsD, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
-    // printf("\nTotal elapsed time : %f ms\n",total_time);
-    // #endif
 
     //___________ Cleaning up ____________________
     #if QUESTION == 1
