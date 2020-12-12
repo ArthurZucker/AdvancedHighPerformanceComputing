@@ -10,6 +10,7 @@
 #include <time.h>
 
 using namespace std;
+// print error of cuda
 void testCUDA(cudaError_t error, const char *file, int line)  {
 	if (error != cudaSuccess) {
 	   printf("There is an error in file %s at line %d\n", file, line);
@@ -17,6 +18,8 @@ void testCUDA(cudaError_t error, const char *file, int line)  {
        exit(EXIT_FAILURE);
 	} 
 }
+
+// check if the table seqM of size sizeM is sorted
 int is_sorted(const int *seqM,const int sizeM){
     int sorted =1;
     for(int i=0;i<sizeM-1;i++){
@@ -34,11 +37,13 @@ int is_sorted(const int *seqM,const int sizeM){
     return sorted;
     
 }
-    
+
+// used in the quicksort function
 int cmpfunc (const void * a, const void * b) {
     return ( *(int*)a - *(int*)b );
  }
  
+// print the table seqM of size sizeM is sorted
 void print_t(const int *seqM,const int sizeM){
     cout<<"[";
     for (int i = 0; i <sizeM-1; i++) 

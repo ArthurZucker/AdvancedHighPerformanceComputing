@@ -61,11 +61,61 @@ void merged_path_seq(const int *__restrict__ A,const int *__restrict__ B, int *_
 	}
 }
 
+//_______________________________________________________________________Question 1____________________________________________________________________________________________________
+// normal
+__global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int sA, const int sB, const int sM){
+    /**
+    * Parallel merge of two sorted arrays of size global size <1024
+    * @param A an array of ints to merge with @param B into @param M
+    * @param sA, @param sB, @param sM respective sizes of the arrays
+    * @return Nothing, M is sorted in place
+    */
+    int i = threadIdx.x;
+    if(i<sM){
+        int2 K;
+        int2 P;
+        if(i>sA){
+            K = {i-sA,sA};
+            P = {sA,i-sA};
+        }
+        else{
+            K = {0,i};
+            P = {i,0};
+        }
+        while(1){
+            int offset = int(abs(K.y-P.y)/2);
+            int2 Q = {K.x+offset,K.y-offset};
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
+                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
+                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
+                        M[i] = A[Q.y];
+                   }
+                   else{
+                        M[i] = B[Q.x];
+                   }
+                   break;
+                }
+                else{
+                   K = {Q.x+1,Q.y-1};
+                }
+            }
+            else{
+                P = {Q.x-1,Q.y+1};
+            }
+        }
+    }
+}
+
 // used shared memory
 __global__ void mergeSmall_k_shared(const int *__restrict__ A,const int *__restrict__ B, int *M,const int sA, const int sB, const int sM){
-    // Threads from same block share this memory 
-    // In this case there is only 1 block in the call and at most 1024 threads in the block
-    // Here the shared memory is dynamically allocated 
+    /**
+    * Parallel merge of two sorted arrays of size global size <1024  using shared memeory 
+    * @see mergedSmall_k()
+    * Threads from same block share this memory 
+    * In this case there is only 1 block in the call and at most 1024 threads in the block
+    * Here the shared memory is dynamically allocated 
+    */
+
     extern __shared__ int shared[]; // dynamic. Extern allows for the host to allocate the memory 
     //__shared__ int shared[1024];  // static
     int i = threadIdx.x;            // only one thread thus Block idX not relevant 
@@ -113,6 +163,13 @@ __global__ void mergeSmall_k_shared(const int *__restrict__ A,const int *__restr
 }
 // used texture memory
 __global__ void mergedSmall_k_texture(int *__restrict__ M,const int sA, const int sB, const int sM){
+    /**
+    * Parallel merge of two sorted arrays  of size global size <1024 using texture memory
+    * @see mergedSmall_k()
+    * Threads from same block share this memory 
+    * In this case there is only 1 block in the call and at most 1024 threads in the block
+    * Here the shared memory is dynamically allocated 
+    */
     int i = threadIdx.x;
     if(i<sM){
         int2 K;
@@ -153,6 +210,13 @@ __global__ void mergedSmall_k_texture(int *__restrict__ M,const int sA, const in
 }
 // used ldg
 __global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
+    /**
+    * Parallel merge of two sorted arrays  of size global size <1024 using explicit load 
+    * @see mergedSmall_k()
+    * Threads from same block share this memory 
+    * In this case there is only 1 block in the call and at most 1024 threads in the block
+    * Here the shared memory is dynamically allocated 
+    */
     int i = threadIdx.x;
     if(i<sM){
         int2 K;
@@ -190,58 +254,20 @@ __global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restric
         }
     }
 }
-// zerocopy
-__global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int sA, const int sB, const int sM){
-    /**
-    * Parallel merge of two sorted arrays
-    * @param A an array of ints to merge with @param B into @param M
-    * @param sA, @param sB, @param sM respective sizes of the arrays
-    * @see main()
-    * @return Nothing, M is sorted in place
-    */
-
-    int i = threadIdx.x;
-    if(i<sM){
-        int2 K;
-        int2 P;
-        if(i>sA){
-            K = {i-sA,sA};
-            P = {sA,i-sA};
-        }
-        else{
-            K = {0,i};
-            P = {i,0};
-        }
-        while(1){
-            int offset = int(abs(K.y-P.y)/2);
-            int2 Q = {K.x+offset,K.y-offset};
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
-                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
-                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
-                        M[i] = A[Q.y];
-                   }
-                   else{
-                        M[i] = B[Q.x];
-                   }
-                   break;
-                }
-                else{
-                   K = {Q.x+1,Q.y-1};
-                }
-            }
-            else{
-                P = {Q.x-1,Q.y+1};
-            }
-        }
-    }
-}
 
 
 //_______________________________________________________________________Question 2____________________________________________________________________________________________________
 
 __device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
-    // wrapper for merge_big_k
-    // uses the same algorythm as in previous questions
+    
+    /**
+    * Parallel merge wrapper for merge_big_k using ldg load
+    * @param A an array of ints to merge with @param B into @param M
+    * @param sA, @param sB, @param sM respective sizes of the arrays
+    * @see merge_big_k()
+    * @return Nothing, M is sorted in place
+    */
+
     int i  = threadIdx.x;
     if(i<sM){
         int2 K;
@@ -282,8 +308,13 @@ __device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B
 }
 
 __device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,const int sA, const int sB, const int sM){
-    // wrapper for merge_big_k
-    // uses the same algorythm as in previous questions
+    /**
+    * Parallel merge wrapper for merge_big_k 
+    * @param A an array of ints to merge with @param B into @param M
+    * @param sA, @param sB, @param sM respective sizes of the arrays
+    * @see merge_big_k()
+    * @return Nothing, M is sorted in place
+    */ 
     int i  = threadIdx.x;
     int2 K;
     int2 P;
@@ -319,11 +350,22 @@ __device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int
 }
 
 __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
-    // using blocks of 34/64 and 128 is faster
-    // Only one thread per block finds entry points.
-    // It will write the entry points on the path using the following syntax : 
-    //     path[2* block indew] |  path[2* block indew +1] 
-    //         ai               |       bi                      
+    
+    /**
+    * Parallel path finder. Find the frontier of 0 and 1 in the merging matrix
+    * @param A an array of ints to merge with @param B into @param M
+    * @param sA, @param sB, @param sM respective sizes of the arrays
+    * @param path contains the indexes in A and B at the diagonal point 
+    * corresponding to the point were A < B
+    * @return Nothing, the path is initialized
+    * @note using blocks of 34/64 and 128 is faster
+    * Only one thread per block finds entry points.
+    * It will write the entry points on the path using the following syntax : 
+    *     path[2* block indew] |  path[2* block indew +1] 
+    *        ai               |       bi              
+    */
+    
+        
     
     if(threadIdx.x == 0){
         int i = blockDim.x*(blockIdx.x);
@@ -369,10 +411,18 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
 }
 
 __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, const int *__restrict__ path, const int m){
-    //           ai            bi          ai+1         bi+1
-    //          ( entring point)          (exit point) for the subarrays
-    // if load in shared, then each thread will load 1 element from A[path[i]] to A[path[i+2]] 
-    // and  B[path[i+1]] to B[path[i+3]]
+    /**
+    * Merge two arrays from a given path.
+    * @param A an array of ints to merge with @param B into @param M
+    * @param sA, @param sB, @param sM respective sizes of the arrays
+    * @param path contains the indexes in A and B at the diagonal point 
+    * corresponding to the point were A < B
+    * @return Nothing, the path is initialized
+    * @note Details on the values of path
+    *  [ ai            bi   ]      [ ai+1         bi+1  ]    
+    *  [  entring point     ]      [     exit point     ] for the subarrays  
+    */
+    
     int i = blockIdx.x;
     #if VERBOSE == 1
     printf("thread %6.d, has to work on \tA[%6d]->A[%6d]\tB[%6d]->B[%6d]\tM[%6.d]\n",blockDim.x*blockIdx.x + threadIdx.x,path[2*i],path[2*(i+1)],path[2*(i)+1],path[2*(i+1)+1],   blockDim.x*blockIdx.x  );   
@@ -383,24 +433,40 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
     if(blockDim.x*blockIdx.x+threadIdx.x < m) merged_k(&A[  path[2*i]  ],&B[  path[(2*i)+1]  ], &M[  blockDim.x*blockIdx.x ],    path[  2*(i+1)  ] - path[2*i]     ,    path[2*(i+1)+1] - path[2*i+1]    ,   path[2*(i+1)] - path[2*i]+ path[2*(i+1)+1] - path[2*i+1]     );
 }
 
-
 __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
-    // each thread will use sequentiel merge on his path
-    // it is slow 
+     /**
+    * Naive Merge two arrays from a given path.
+    * @param A an array of ints to merge with @param B into @param M
+    * @param sA, @param sB, @param sM respective sizes of the arrays
+    * @param path contains the indexes in A and B at the diagonal point 
+    * corresponding to the point were A < B
+    * @return Nothing, the path is initialized
+    * @note Each thread block will merge each subarray using the sequential merge
+    * this has to be called on the maximum number of threads
+    */
     int i = blockDim.x*blockIdx.x + threadIdx.x;
     merged_path_seq_device(&A[path[2*i]],&B[path[2*i+1]], &M[i],path[2*i+2]-path[2*i], path[2*i+3]-path[2*i]);
 
 }
 
 
-void sort_array( int   *hD, int   *hsD,const int sizeM,const int tpb){
+void sort_array( int   *hD, int   *hsD,const int sizeD,const int tpb){
+     /**
+    * Sorts any array M using pervious functions
+    * @param tpb number of threads to use in pathBig and mergedBig
+    * @param hD constains the initals unsorted array
+    * @param hsD will contain the final sorted array
+    * @return Nothing, M is sorted on place
+    * @note The complexity should be log(sizeD), but it is not
+    * this implementation is not efficient since it loops
+    */
     int i;
-    for( i=1;i<sizeM;i*=2){
+    for( i=1;i<sizeD;i*=2){
         // iterate over the size of the sub arrays that are being sorted
         int *__restrict__ path;
         int nblocks = (2*i+tpb-1)/tpb ;
         cudaMalloc((void **)&path,2*(nblocks+1)*sizeof(int));
-        for(int j=0;j<sizeM;j+=2*i){
+        for(int j=0;j<sizeD;j+=2*i){
             // iterate over the subarrays. 
             if(i>512){ // if the global size of array is > 1024
                 
