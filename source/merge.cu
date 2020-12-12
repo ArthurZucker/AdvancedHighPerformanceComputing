@@ -189,8 +189,8 @@ __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ 
     * A brief description. A more elaborate class description
     * @param A an array of ints to merge with @param B into @param M
     * @param sA,sB,sM respective sizes of the arrays
-    * @see Test()
-    * @return 
+    * @see main()
+    * @return Nothing, M is sorted in place
     */
     int i = threadIdx.x;
     if(i<sM){
