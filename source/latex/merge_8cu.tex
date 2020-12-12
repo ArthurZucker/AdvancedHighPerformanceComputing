@@ -1,0 +1,232 @@
+\hypertarget{merge_8cu}{}\doxysection{merge.\+cu File Reference}
+\label{merge_8cu}\index{merge.cu@{merge.cu}}
+
+
+contains all merge kernels  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$iterator$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}merge.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{merge_8cu_a42f8c497a1968074f38bf5055c650dca}\label{merge_8cu_a42f8c497a1968074f38bf5055c650dca}} 
+\#define {\bfseries V\+E\+R\+B\+O\+SE}~0
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a16374b01538d2c6dd3e7ba3f0fc3c5c3}{merged\+\_\+path\+\_\+seq\+\_\+device}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, const int a, const int b)
+\item 
+\mbox{\Hypertarget{merge_8cu_a82e8842f806c71a16f22705d0cdcb520}\label{merge_8cu_a82e8842f806c71a16f22705d0cdcb520}} 
+void {\bfseries merged\+\_\+path\+\_\+seq} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, const int a, const int b)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a95447523df830d27e23dbcc8cd636534}{merged\+Small\+\_\+k}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, const int sA, const int sB, const int sM)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a356c870275f04a8dd53a6740afb84f77}{merge\+Small\+\_\+k\+\_\+shared}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$M, const int sA, const int sB, const int sM)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a764cfd54a729fb71dbd71f42dad8d5d7}{merged\+Small\+\_\+k\+\_\+texture}} (int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, const int sA, const int sB, const int sM)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a2ba1ecb86f2b48164c5c52a2a97a8498}{merged\+Small\+\_\+k\+\_\+ldg}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, int sA, int sB, int sM)
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a348c7dc342b4822a942dd74bfdfedd9d}{merged\+\_\+k\+\_\+ldg}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, int sA, int sB, int sM)
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a2b20dc20bc5f5bc3f4bdf847f142c0a7}{merged\+\_\+k}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, const int sA, const int sB, const int sM)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a1bb71610f5fc23fb73e504b738d5985d}{path\+Big\+\_\+k}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ path, const int sA, const int sB, const int sM)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a5a93f3b8415c51f86cc635035d17c38b}{merged\+\_\+\+Big\+\_\+k}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ path, const int m)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{merge_8cu_a19007416848f7334a59125234c1e47e4}{merged\+\_\+\+Big\+\_\+k\+\_\+naive}} (const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ A, const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ B, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ M, int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ path, const int m)
+\item 
+void \mbox{\hyperlink{merge_8cu_a05a93fece8abff094bca8465f6768e12}{sort\+\_\+array}} (int $\ast$hD, int $\ast$hsD, const int sizeD, const int tpb)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+contains all merge kernels 
+
+\begin{DoxyAuthor}{Author}
+Arthur Zucker \& Clément Apavou ~\newline
+ 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+12 Dec 2020 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{merge_8cu_a5a93f3b8415c51f86cc635035d17c38b}\label{merge_8cu_a5a93f3b8415c51f86cc635035d17c38b}} 
+\index{merge.cu@{merge.cu}!merged\_Big\_k@{merged\_Big\_k}}
+\index{merged\_Big\_k@{merged\_Big\_k}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{merged\_Big\_k()}{merged\_Big\_k()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merged\+\_\+\+Big\+\_\+k (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{path,  }\item[{const int}]{m }\end{DoxyParamCaption})}
+
+Merge two arrays from a given path. 
+\begin{DoxyParams}{Parameters}
+{\em A} & an array of ints to merge with\\
+\hline
+{\em B} & into\\
+\hline
+{\em M} & \\
+\hline
+{\em sA} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{merge_8cu_a19007416848f7334a59125234c1e47e4}\label{merge_8cu_a19007416848f7334a59125234c1e47e4}} 
+\index{merge.cu@{merge.cu}!merged\_Big\_k\_naive@{merged\_Big\_k\_naive}}
+\index{merged\_Big\_k\_naive@{merged\_Big\_k\_naive}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{merged\_Big\_k\_naive()}{merged\_Big\_k\_naive()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merged\+\_\+\+Big\+\_\+k\+\_\+naive (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{path,  }\item[{const int}]{m }\end{DoxyParamCaption})}
+
+Naive Merge two arrays from a given path. 
+\begin{DoxyParams}{Parameters}
+{\em A} & an array of ints to merge with\\
+\hline
+{\em B} & into\\
+\hline
+{\em M} & \\
+\hline
+{\em sA} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{merge_8cu_a2b20dc20bc5f5bc3f4bdf847f142c0a7}\label{merge_8cu_a2b20dc20bc5f5bc3f4bdf847f142c0a7}} 
+\index{merge.cu@{merge.cu}!merged\_k@{merged\_k}}
+\index{merged\_k@{merged\_k}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{merged\_k()}{merged\_k()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ void merged\+\_\+k (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{const int}]{sA,  }\item[{const int}]{sB,  }\item[{const int}]{sM }\end{DoxyParamCaption})}
+
+Parallel merge wrapper for merge\+\_\+big\+\_\+k 
+\begin{DoxyParams}{Parameters}
+{\em A} & an array of ints to merge with\\
+\hline
+{\em B} & into\\
+\hline
+{\em M} & \\
+\hline
+{\em sA} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{merge_8cu_a348c7dc342b4822a942dd74bfdfedd9d}\label{merge_8cu_a348c7dc342b4822a942dd74bfdfedd9d}} 
+\index{merge.cu@{merge.cu}!merged\_k\_ldg@{merged\_k\_ldg}}
+\index{merged\_k\_ldg@{merged\_k\_ldg}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{merged\_k\_ldg()}{merged\_k\_ldg()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ void merged\+\_\+k\+\_\+ldg (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{int}]{sA,  }\item[{int}]{sB,  }\item[{int}]{sM }\end{DoxyParamCaption})}
+
+Parallel merge wrapper for merge\+\_\+big\+\_\+k using ldg load 
+\begin{DoxyParams}{Parameters}
+{\em A} & an array of ints to merge with\\
+\hline
+{\em B} & into\\
+\hline
+{\em M} & \\
+\hline
+{\em sA} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{merge_8cu_a16374b01538d2c6dd3e7ba3f0fc3c5c3}\label{merge_8cu_a16374b01538d2c6dd3e7ba3f0fc3c5c3}} 
+\index{merge.cu@{merge.cu}!merged\_path\_seq\_device@{merged\_path\_seq\_device}}
+\index{merged\_path\_seq\_device@{merged\_path\_seq\_device}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{merged\_path\_seq\_device()}{merged\_path\_seq\_device()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ void merged\+\_\+path\+\_\+seq\+\_\+device (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{const int}]{a,  }\item[{const int}]{b }\end{DoxyParamCaption})}
+
+Sequential merge using the code from the article 
+\begin{DoxyParams}{Parameters}
+{\em A} & an array of ints to merge with\\
+\hline
+{\em B} & into\\
+\hline
+{\em M} & \\
+\hline
+{\em a} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{merge_8cu_a95447523df830d27e23dbcc8cd636534}\label{merge_8cu_a95447523df830d27e23dbcc8cd636534}} 
+\index{merge.cu@{merge.cu}!mergedSmall\_k@{mergedSmall\_k}}
+\index{mergedSmall\_k@{mergedSmall\_k}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{mergedSmall\_k()}{mergedSmall\_k()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merged\+Small\+\_\+k (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{const int}]{sA,  }\item[{const int}]{sB,  }\item[{const int}]{sM }\end{DoxyParamCaption})}
+
+Parallel merge of two sorted arrays of size global size $<$1024 
+\begin{DoxyParams}{Parameters}
+{\em A} & an array of ints to merge with\\
+\hline
+{\em B} & into\\
+\hline
+{\em M} & \\
+\hline
+{\em sA} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{merge_8cu_a2ba1ecb86f2b48164c5c52a2a97a8498}\label{merge_8cu_a2ba1ecb86f2b48164c5c52a2a97a8498}} 
+\index{merge.cu@{merge.cu}!mergedSmall\_k\_ldg@{mergedSmall\_k\_ldg}}
+\index{mergedSmall\_k\_ldg@{mergedSmall\_k\_ldg}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{mergedSmall\_k\_ldg()}{mergedSmall\_k\_ldg()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merged\+Small\+\_\+k\+\_\+ldg (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{int}]{sA,  }\item[{int}]{sB,  }\item[{int}]{sM }\end{DoxyParamCaption})}
+
+Parallel merge of two sorted arrays of size global size $<$1024 using explicit load \begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{merge_8cu_a95447523df830d27e23dbcc8cd636534}{merged\+Small\+\_\+k()}} Threads from same block share this memory In this case there is only 1 block in the call and at most 1024 threads in the block Here the shared memory is dynamically allocated
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{merge_8cu_a764cfd54a729fb71dbd71f42dad8d5d7}\label{merge_8cu_a764cfd54a729fb71dbd71f42dad8d5d7}} 
+\index{merge.cu@{merge.cu}!mergedSmall\_k\_texture@{mergedSmall\_k\_texture}}
+\index{mergedSmall\_k\_texture@{mergedSmall\_k\_texture}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{mergedSmall\_k\_texture()}{mergedSmall\_k\_texture()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merged\+Small\+\_\+k\+\_\+texture (\begin{DoxyParamCaption}\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{M,  }\item[{const int}]{sA,  }\item[{const int}]{sB,  }\item[{const int}]{sM }\end{DoxyParamCaption})}
+
+Parallel merge of two sorted arrays of size global size $<$1024 using texture memory \begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{merge_8cu_a95447523df830d27e23dbcc8cd636534}{merged\+Small\+\_\+k()}} Threads from same block share this memory In this case there is only 1 block in the call and at most 1024 threads in the block Here the shared memory is dynamically allocated
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{merge_8cu_a356c870275f04a8dd53a6740afb84f77}\label{merge_8cu_a356c870275f04a8dd53a6740afb84f77}} 
+\index{merge.cu@{merge.cu}!mergeSmall\_k\_shared@{mergeSmall\_k\_shared}}
+\index{mergeSmall\_k\_shared@{mergeSmall\_k\_shared}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{mergeSmall\_k\_shared()}{mergeSmall\_k\_shared()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merge\+Small\+\_\+k\+\_\+shared (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$}]{M,  }\item[{const int}]{sA,  }\item[{const int}]{sB,  }\item[{const int}]{sM }\end{DoxyParamCaption})}
+
+Parallel merge of two sorted arrays of size global size $<$1024 using shared memeory \begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{merge_8cu_a95447523df830d27e23dbcc8cd636534}{merged\+Small\+\_\+k()}} Threads from same block share this memory In this case there is only 1 block in the call and at most 1024 threads in the block Here the shared memory is dynamically allocated
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{merge_8cu_a1bb71610f5fc23fb73e504b738d5985d}\label{merge_8cu_a1bb71610f5fc23fb73e504b738d5985d}} 
+\index{merge.cu@{merge.cu}!pathBig\_k@{pathBig\_k}}
+\index{pathBig\_k@{pathBig\_k}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{pathBig\_k()}{pathBig\_k()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void path\+Big\+\_\+k (\begin{DoxyParamCaption}\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{A,  }\item[{const int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{B,  }\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{path,  }\item[{const int}]{sA,  }\item[{const int}]{sB,  }\item[{const int}]{sM }\end{DoxyParamCaption})}
+
+Parallel path finder. Find the frontier of 0 and 1 in the merging matrix 
+\begin{DoxyParams}{Parameters}
+{\em A} & an array of ints to merge with\\
+\hline
+{\em B} & into\\
+\hline
+{\em M} & \\
+\hline
+{\em sA} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{merge_8cu_a05a93fece8abff094bca8465f6768e12}\label{merge_8cu_a05a93fece8abff094bca8465f6768e12}} 
+\index{merge.cu@{merge.cu}!sort\_array@{sort\_array}}
+\index{sort\_array@{sort\_array}!merge.cu@{merge.cu}}
+\doxysubsubsection{\texorpdfstring{sort\_array()}{sort\_array()}}
+{\footnotesize\ttfamily void sort\+\_\+array (\begin{DoxyParamCaption}\item[{int $\ast$}]{hD,  }\item[{int $\ast$}]{hsD,  }\item[{const int}]{sizeD,  }\item[{const int}]{tpb }\end{DoxyParamCaption})}
+
+Sorts any array M using pervious functions 
+\begin{DoxyParams}{Parameters}
+{\em tpb} & number of threads to use in path\+Big and merged\+Big \\
+\hline
+{\em hD} & constains the initals unsorted array \\
+\hline
+{\em hsD} & will contain the final sorted array \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Nothing, M is sorted on place 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+The complexity should be log(size\+D), but it is not this implementation is not efficient since it loops
+\end{DoxyNote}

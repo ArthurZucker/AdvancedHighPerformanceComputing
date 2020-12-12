@@ -1,0 +1,79 @@
+\hypertarget{batch__merge_8cu}{}\doxysection{batch\+\_\+merge.\+cu File Reference}
+\label{batch__merge_8cu}\index{batch\_merge.cu@{batch\_merge.cu}}
+
+
+contains all batch-\/merge kernels  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$iterator$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}batch\+\_\+merge.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{batch__merge_8cu_ae7d645972bf0a79f08583c15056fc0b8}{merge\+Small\+Batch\+\_\+k}} (int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ all\+\_\+M, int $\ast$M, int $\ast$all\+\_\+sA, int $\ast$all\+\_\+sB, int d)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{batch__merge_8cu_a7a56ff31f6150fbf70a43c5241f0d0e2}{merge\+Small\+Batch\+\_\+k\+\_\+ldg}} (int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ all\+\_\+M, int $\ast$M, int $\ast$all\+\_\+sA, int $\ast$all\+\_\+sB, int d)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{batch__merge_8cu_a8e4a03bd8261a3c4bfa515f204596307}{merge\+Small\+Batch\+\_\+k\+\_\+shared}} (int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ all\+\_\+M, int $\ast$M, int $\ast$all\+\_\+sA, int $\ast$all\+\_\+sB, int d)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+contains all batch-\/merge kernels 
+
+\begin{DoxyAuthor}{Author}
+Arthur Zucker \& Clément Apavou ~\newline
+ 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+12 Dec 2020 
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{batch__merge_8cu_ae7d645972bf0a79f08583c15056fc0b8}\label{batch__merge_8cu_ae7d645972bf0a79f08583c15056fc0b8}} 
+\index{batch\_merge.cu@{batch\_merge.cu}!mergeSmallBatch\_k@{mergeSmallBatch\_k}}
+\index{mergeSmallBatch\_k@{mergeSmallBatch\_k}!batch\_merge.cu@{batch\_merge.cu}}
+\doxysubsubsection{\texorpdfstring{mergeSmallBatch\_k()}{mergeSmallBatch\_k()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merge\+Small\+Batch\+\_\+k (\begin{DoxyParamCaption}\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{all\+\_\+M,  }\item[{int $\ast$}]{M,  }\item[{int $\ast$}]{all\+\_\+sA,  }\item[{int $\ast$}]{all\+\_\+sB,  }\item[{int}]{d }\end{DoxyParamCaption})}
+
+takes a big array
+\begin{DoxyParams}{Parameters}
+{\em all\+\_\+M} & containing (Ai and Bi) suach as all\+\_\+M = (A1$\vert$\+B1$\vert$...$\vert$\+A\+N$\vert$\+BN) \\
+\hline
+{\em all\+\_\+sA} & contains all size of different A (all\+\_\+sA\mbox{[}0\mbox{]} = $\vert$\+A0$\vert$) \\
+\hline
+{\em all\+\_\+sB} & contains all size of different B (all\+\_\+sB\mbox{[}0\mbox{]} = $\vert$\+B0$\vert$) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Nothing, each sub array is sorted 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+we stored sizes of Ai and Bi because $\vert$\+Ai$\vert$!=$\vert$\+Bi$\vert$ and $\vert$\+Ai$\vert$ and $\vert$\+Bi$\vert$ not constant d is the number of element that there is in the array Mi, i.\+e all\+\_\+sA\mbox{[}i\mbox{]}+all\+\_\+sB\mbox{[}i\mbox{]} = d size of M and all\+\_\+M is d$\ast$N
+\end{DoxyNote}
+\mbox{\Hypertarget{batch__merge_8cu_a7a56ff31f6150fbf70a43c5241f0d0e2}\label{batch__merge_8cu_a7a56ff31f6150fbf70a43c5241f0d0e2}} 
+\index{batch\_merge.cu@{batch\_merge.cu}!mergeSmallBatch\_k\_ldg@{mergeSmallBatch\_k\_ldg}}
+\index{mergeSmallBatch\_k\_ldg@{mergeSmallBatch\_k\_ldg}!batch\_merge.cu@{batch\_merge.cu}}
+\doxysubsubsection{\texorpdfstring{mergeSmallBatch\_k\_ldg()}{mergeSmallBatch\_k\_ldg()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merge\+Small\+Batch\+\_\+k\+\_\+ldg (\begin{DoxyParamCaption}\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{all\+\_\+M,  }\item[{int $\ast$}]{M,  }\item[{int $\ast$}]{all\+\_\+sA,  }\item[{int $\ast$}]{all\+\_\+sB,  }\item[{int}]{d }\end{DoxyParamCaption})}
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{batch__merge_8cu_ae7d645972bf0a79f08583c15056fc0b8}{merge\+Small\+Batch\+\_\+k()}}, does the same with ldg
+\end{DoxySeeAlso}
+\mbox{\Hypertarget{batch__merge_8cu_a8e4a03bd8261a3c4bfa515f204596307}\label{batch__merge_8cu_a8e4a03bd8261a3c4bfa515f204596307}} 
+\index{batch\_merge.cu@{batch\_merge.cu}!mergeSmallBatch\_k\_shared@{mergeSmallBatch\_k\_shared}}
+\index{mergeSmallBatch\_k\_shared@{mergeSmallBatch\_k\_shared}!batch\_merge.cu@{batch\_merge.cu}}
+\doxysubsubsection{\texorpdfstring{mergeSmallBatch\_k\_shared()}{mergeSmallBatch\_k\_shared()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void merge\+Small\+Batch\+\_\+k\+\_\+shared (\begin{DoxyParamCaption}\item[{int $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+}]{all\+\_\+M,  }\item[{int $\ast$}]{M,  }\item[{int $\ast$}]{all\+\_\+sA,  }\item[{int $\ast$}]{all\+\_\+sB,  }\item[{int}]{d }\end{DoxyParamCaption})}
+
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{batch__merge_8cu_ae7d645972bf0a79f08583c15056fc0b8}{merge\+Small\+Batch\+\_\+k()}}, does the same using shared memory
+\end{DoxySeeAlso}
