@@ -23,7 +23,7 @@ that merges two by two, for each i, Ai and Bi.
 // size of M and all_M is d*N 
 __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, int *all_sB,int d){
     
-    int tidx = threadIdx.x%d; // to know which element of the below-array the thead treats
+    int tidx = threadIdx.x%d; // to know which element of the sub-array the thread treats
     int Qt = (threadIdx.x-tidx)/d;
     int gbx = Qt + blockIdx.x*(blockDim.x/d);// which array it treats
 
@@ -34,7 +34,7 @@ __global__ void mergeSmallBatch_k(int *__restrict__ all_M,int *M,int *all_sA, in
     int *A = &all_M[gbx*d];
     int *B = &all_M[gbx*d+sA];
    
-    int i = blockDim.x*blockIdx.x + threadIdx.x;
+    int i = blockDim.x*blockIdx.x + threadIdx.x;//global thread index  
     if(tidx<d){
         int2 K;
         int2 P;
@@ -97,8 +97,7 @@ __global__ void mergeSmallBatch_k_ldg(int *__restrict__ all_M,int *M,int *all_sA
         while(1){
             int offset = int(abs(K.y-P.y)/2);
             int2 Q = {K.x+offset,K.y-offset};
-            // __ldg intrinsic and const __restrict__ garanties the compiler that it is read only
-            // thus no aliasing is done
+    
             if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || __ldg(&A[Q.y]) > __ldg(&B[Q.x-1]))){
                 if(Q.x==sB || Q.y==0 || __ldg(&A[Q.y-1])<=__ldg(&B[Q.x])){
                    if(Q.y < sA && (Q.x == sB || __ldg(&A[Q.y])<=__ldg(&B[Q.x]))){
@@ -160,105 +159,6 @@ __global__ void mergeSmallBatch_k_shared(int *__restrict__ all_M,int *M,int *all
                    }
                    else{
                         M[i] = shared[sA+Q.x];
-                   }
-                   break;
-                }
-                else{
-                   K = {Q.x+1,Q.y-1};
-                }
-            }
-            else{
-                P = {Q.x-1,Q.y+1};
-            }
-        }
-    }
-}
-
-// function SortSmallBatch_k takes a big array all_M containing (Ai and Bi) like this : all_M = (A1|B1|...|AN|BN)
-// it returns M the array of all_M with arrays Ai and Bi merge and sort
-// si is the size of the arrays Ai and Bi (we fixed |Ai|=|Bi|) all Ai and Bi have the same size
-__global__ void SortSmallBatch_k(int *__restrict__ all_M,int *M,int si,int d){
-    int tidx = threadIdx.x%d;
-    int Qt = (threadIdx.x-tidx)/d;
-    int gbx = Qt + blockIdx.x*(blockDim.x/d);
-
-    int sA = si;
-    int sB = si;
-    int *A = &all_M[gbx*d];
-    int *B = &all_M[gbx*d+sA];
-   
-    int i = blockDim.x*blockIdx.x + threadIdx.x;
-    if(tidx<d){
-        int2 K;
-        int2 P;
-        if(tidx>sA){
-            K = {tidx-sA,sA};
-            P = {sA,tidx-sA};
-        }
-        else{
-            K = {0,tidx};
-            P = {tidx,0};
-        }
-        while(1){
-            int offset = int(abs(K.y-P.y)/2);
-            int2 Q = {K.x+offset,K.y-offset};
-
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
-                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
-                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
-                        M[i] = A[Q.y];
-                   }
-                   else{
-                        M[i] = B[Q.x];
-                   }
-                   break;
-                }
-                else{
-                   K = {Q.x+1,Q.y-1};
-                }
-            }
-            else{
-                P = {Q.x-1,Q.y+1};
-            }
-        }
-    }
-}
-
-// SortSmallBatch using ldg
-__global__ void SortSmallBatch_k_ldg(int *__restrict__ all_M,int *M,int si,int d){
-    int tidx = threadIdx.x%d;
-    int Qt = (threadIdx.x-tidx)/d;
-    int gbx = Qt + blockIdx.x*(blockDim.x/d);
-
-    int sA = si;
-    int sB = si;
-    int *A = &all_M[gbx*d];
-    int *B = &all_M[gbx*d+sA];
-   
-    int i = blockDim.x*blockIdx.x + threadIdx.x;
-    if(tidx<d){
-        int2 K;
-        int2 P;
-        if(tidx>sA){
-            K = {tidx-sA,sA};
-            P = {sA,tidx-sA};
-        }
-        else{
-            K = {0,tidx};
-            P = {tidx,0};
-        }
-        while(1){
-            int offset = int(abs(K.y-P.y)/2);
-            int2 Q = {K.x+offset,K.y-offset};
-            // __ldg intrinsic and const __restrict__ garanties the compiler that it is read only
-            // thus no aliasing is done
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || __ldg(&A[Q.y]) > __ldg(&B[Q.x-1]))){
-                if(Q.x==sB || Q.y==0 || __ldg(&A[Q.y-1])<=__ldg(&B[Q.x])){
-                   if(Q.y < sA && (Q.x == sB || __ldg(&A[Q.y])<=__ldg(&B[Q.x]))){
-                        M[i] = __ldg(&A[Q.y]);
-                   }
-                   else{
-                        M[i] = __ldg(&B[Q.x]);
                    }
                    break;
                 }
