@@ -185,6 +185,13 @@ __global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restric
 }
 // zerocopy
 __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int sA, const int sB, const int sM){
+    /**
+    * A brief description. A more elaborate class description
+    * @param A an array of ints to merge with @param B into @param M
+    * @param sA,sB,sM respective sizes of the arrays
+    * @see Test()
+    * @return 
+    */
     int i = threadIdx.x;
     if(i<sM){
         int2 K;
@@ -225,8 +232,8 @@ __global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ 
 //_______________________________________________________________________Question 2____________________________________________________________________________________________________
 
 __device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
-    // each block will launch this one 
-    // try window of 64 + shared memory (blokcs of 32) 
+    // wrapper for merge_big_k
+    // uses the same algorythm as in previous questions
     int i  = threadIdx.x;
     if(i<sM){
         int2 K;
@@ -267,8 +274,8 @@ __device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B
 }
 
 __device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,const int sA, const int sB, const int sM){
-    // each block will launch this one 
-    // try window of 64 + shared memory (blokcs of 32) 
+    // wrapper for merge_big_k
+    // uses the same algorythm as in previous questions
     int i  = threadIdx.x;
     int2 K;
     int2 P;
@@ -304,7 +311,11 @@ __device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int
 }
 
 __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
-    // try blocks of 32-64 thread to load in shared only on give the result
+    // using blocks of 34/64 and 128 is faster
+    // Only one thread per block finds entry points.
+    // It will write the entry points on the path using the following syntax : 
+    //     path[2* block indew] |  path[2* block indew +1] 
+    //         ai               |       bi                      
     
     if(threadIdx.x == 0){
         int i = blockDim.x*(blockIdx.x);
@@ -334,8 +345,8 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
                         #if VERBOSE == 1
                         printf("%4d/%d  Entry point found (%d,%d)\n",blockIdx.x,gridDim.x,Q.y,Q.x);
                         #endif
-                        path[2*blockIdx.x]   = Q.y; 
-                        path[2*blockIdx.x+1] = Q.x; 
+                        path[2*blockIdx.x]   = Q.y;  // writing ai to path
+                        path[2*blockIdx.x+1] = Q.x;  // writing bi
                     break;
                     }
                     else{
@@ -350,24 +361,24 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
 }
 
 __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, const int *__restrict__ path, const int m){
-    // retrieve path[i] and path[i+1] and path[i+2], path[i+3] => use __ldg() for int4!! 
     //           ai            bi          ai+1         bi+1
     //          ( entring point)          (exit point) for the subarrays
     // if load in shared, then each thread will load 1 element from A[path[i]] to A[path[i+2]] 
     // and  B[path[i+1]] to B[path[i+3]]
-    // int4 = reinterpret_cast<int24*>(&path[i])
-    // here use sequential merge on each subarrays
     int i = blockIdx.x;
     #if VERBOSE == 1
     printf("thread %6.d, has to work on \tA[%6d]->A[%6d]\tB[%6d]->B[%6d]\tM[%6.d]\n",blockDim.x*blockIdx.x + threadIdx.x,path[2*i],path[2*(i+1)],path[2*(i)+1],path[2*(i+1)+1],   blockDim.x*blockIdx.x  );   
     #endif
+    // each thread block deals with the same subarrays A and  B
+    // each block will have a number of thread equal to the number of entry points
+    // working on diagonals
     if(blockDim.x*blockIdx.x+threadIdx.x < m) merged_k(&A[  path[2*i]  ],&B[  path[(2*i)+1]  ], &M[  blockDim.x*blockIdx.x ],    path[  2*(i+1)  ] - path[2*i]     ,    path[2*(i+1)+1] - path[2*i+1]    ,   path[2*(i+1)] - path[2*i]+ path[2*(i+1)+1] - path[2*i+1]     );
 }
 
 
 __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
     // each thread will use sequentiel merge on his path
-    // it is slow because of the requests mad to the server
+    // it is slow 
     int i = blockDim.x*blockIdx.x + threadIdx.x;
     merged_path_seq_device(&A[path[2*i]],&B[path[2*i+1]], &M[i],path[2*i+2]-path[2*i], path[2*i+3]-path[2*i]);
 
@@ -377,20 +388,23 @@ __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__res
 void sort_array( int   *hD, int   *hsD,const int sizeM,const int tpb){
     int i;
     for( i=1;i<sizeM;i*=2){
+        // iterate over the size of the sub arrays that are being sorted
         int *__restrict__ path;
         int nblocks = (2*i+tpb-1)/tpb ;
         cudaMalloc((void **)&path,2*(nblocks+1)*sizeof(int));
         for(int j=0;j<sizeM;j+=2*i){
-                
-            if(i>512){  // or simply 1024
+            // iterate over the subarrays. 
+            if(i>512){ // if the global size of array is > 1024
                 
                 pathBig_k   <<<nblocks,tpb>>>(&hD[j],&hD[j+i],path,i,i,2*i);
                 merged_Big_k<<<nblocks,tpb>>>(&hD[j],&hD[j+i],&hsD[j],path,2*i);
             }
             else{
+                // One block is enough to deal with every sub arrays
                 mergedSmall_k<<<1,2*i>>>(&hD[j],&hD[j+i],&hsD[j],i,i,2*i);
             }
         }
+        // change pointers, memory efficient
         int *ht = hD;   
         hD = hsD;
         hsD = ht;

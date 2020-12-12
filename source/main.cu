@@ -1,3 +1,24 @@
+/****************************************************************************
+ * Copyright (C) 2020 by Arthur Zucker @ Apavou Clément                     *
+ *                                                                          *
+ * This file is part of Box.                                                *
+ *
+ ****************************************************************************/
+
+/**
+ * @file doxygen_c.h
+ * @author Arthur Zucker & Clément Apavou  
+ * @date 912 Dec 2020
+ * @brief Main file used to produce results for each questions
+ *
+ * In this porject, we tackled the MERGE SORT problem on GPU
+ * using CUDA. We answered questions from a subject. If you want to 
+ * see the original Merge sort articles, 
+ * @see https://www.researchgate.net/profile/Oded-Green/publication/254462662_GPU_merge_path_a_GPU_merging_algorithm/links/543eeaa00cf2e76f02244884/GPU-merge-path-a-GPU-merging-algorithm.pdf
+ * @see https://arxiv.org/pdf/1406.2628.pdf 
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -12,19 +33,12 @@
 #include "utils.h"
 #define testCUDA(error) (testCUDA(error, __FILE__ , __LINE__))
 using namespace std;
-#define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 3
-#define INFO 0
-/*
-TO DO :
- - implement using ldg  avec restricted__  et int4 qui contient 4 int, read only memory
-     const int* __restrict__  A
- - mergeBig_k
- - pathBig_k
+#define QUESTION 3  /**< Choose from {1,2,3,4,5} depending on the question */
+#define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
-*/
+
 int main(int argc, char* argv[]) {
     cudaDeviceReset();
     //___________ Basic initialisation ___________
@@ -52,43 +66,35 @@ int main(int argc, char* argv[]) {
     //____________________________________________
 
     //___________ Variable declaration ___________
-    
     #if QUESTION==2 || QUESTION ==1
-    int sizeA,sizeB;
-    if (argc < 2) {sizeA = rand()%1024;sizeB = rand()%(1024-sizeA);} // If no arguments are provided, set random sizes
-    else if(argc == 2){sizeA=atoi(argv[1]);sizeB=atoi(argv[1]);}
-    else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
-    int sizeM = sizeA+sizeB;
-    printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-    int *hostA,*thostA,*hostB,*thostB,*hostM,*hA,*hB,*hM;
-    int *seqM = (int *) malloc(sizeM*sizeof(int));
-    int *A = (int *) malloc(sizeA*sizeof(int));
-    int *B = (int *) malloc(sizeB*sizeof(int));
-    int *M = (int *) malloc(sizeM*sizeof(int));
-    A[0]=rand()%20;
-    B[0]=rand()%20;
-    for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
-    for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
+        int sizeA,sizeB;
+        if (argc < 2) {sizeA = rand()%1024;sizeB = rand()%(1024-sizeA);} // If no arguments are provided, set random sizes
+        else if(argc == 2){sizeA=atoi(argv[1]);sizeB=atoi(argv[1]);}
+        else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
+        int sizeM = sizeA+sizeB;
+        printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
+        int *hostA,*thostA,*hostB,*thostB,*hostM,*hA,*hB,*hM;
+        int *seqM = (int *) malloc(sizeM*sizeof(int));
+        int *A = (int *) malloc(sizeA*sizeof(int));
+        int *B = (int *) malloc(sizeB*sizeof(int));
+        int *M = (int *) malloc(sizeM*sizeof(int));
+        A[0]=rand()%20;
+        B[0]=rand()%20;
+        for(int i=1;i<sizeA;i++){A[i]=A[i-1]+rand()%20+1;}
+        for(int i=1;i<sizeB;i++){B[i]=B[i-1]+rand()%20+1;}
     #endif
     #if QUESTION == 5
-    int sizeM;
-    if (argc < 2) {sizeM = rand()%1024;} 
-    if (argc == 2) {sizeM=atoi(argv[1]);} // If no arguments are provided, set random sizes
-    printf("|M| = %d\n",sizeM);
+        int sizeM;
+        if (argc < 2) {sizeM = rand()%1024;} 
+        if (argc == 2) {sizeM=atoi(argv[1]);} // If no arguments are provided, set random sizes
+        printf("|M| = %d\n",sizeM);
     #endif
-    
-    
-    
-
-
-    //___________ call kernels ___________________
+    //___________________________ Useful time stamps _________________________________
     cudaEvent_t start, stop;
     testCUDA(cudaEventCreate(&start));
 	testCUDA(cudaEventCreate(&stop));
     float TimeVar=0;
-
-
-    //___________________________Question 1_________________________________
+    //___________________________ Question 1 _________________________________
     #if QUESTION == 1
     //___________ TO DO: explain texture memory ___________
     testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
@@ -126,15 +132,6 @@ int main(int argc, char* argv[]) {
     printf("elapsed time : %f ms\n",time_spent*1000);
     cout<<"Check sorted : "<<is_sorted(seqM,sizeM)<<endl;
     //____________________________________________
-
-
-    
-
-    
-
-    //____________________________________________
-
-    
 
     //___________ zerocopy _______________________
     printf("_______________ zero copy ___________________\n");
@@ -247,7 +244,7 @@ int main(int argc, char* argv[]) {
     //int nb_threads = 128; // changing it might be smart
     //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
     printf("__________________ sort M __________________\n");
-    int threads_per_blocks = 128;
+    int threads_per_blocks = 32;
     for(int d=2;d<262144*2*2;d*=4){
         testCUDA(cudaMalloc((void **)&hsD,d*sizeof(int)));
         testCUDA(cudaMalloc((void **)&hD ,d*sizeof(int)));
