@@ -54,6 +54,45 @@ void merged_path_seq(const int *__restrict__ A,const int *__restrict__ B, int *_
 	}
 }
 
+//_______________________________________________________________________Question 1____________________________________________________________________________________________________
+// normal
+__global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int sA, const int sB, const int sM){
+    int i = threadIdx.x;
+    if(i<sM){
+        int2 K;
+        int2 P;
+        if(i>sA){
+            K = {i-sA,sA};
+            P = {sA,i-sA};
+        }
+        else{
+            K = {0,i};
+            P = {i,0};
+        }
+        while(1){
+            int offset = int(abs(K.y-P.y)/2);
+            int2 Q = {K.x+offset,K.y-offset};
+            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
+                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
+                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
+                        M[i] = A[Q.y];
+                   }
+                   else{
+                        M[i] = B[Q.x];
+                   }
+                   break;
+                }
+                else{
+                   K = {Q.x+1,Q.y-1};
+                }
+            }
+            else{
+                P = {Q.x-1,Q.y+1};
+            }
+        }
+    }
+}
+
 // used shared memory
 __global__ void mergeSmall_k_shared(const int *__restrict__ A,const int *__restrict__ B, int *M,const int sA, const int sB, const int sM){
     // Threads from same block share this memory 
@@ -183,43 +222,8 @@ __global__ void mergedSmall_k_ldg(const int *__restrict__ A,const int *__restric
         }
     }
 }
-// zerocopy
-__global__ void mergedSmall_k(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int sA, const int sB, const int sM){
-    int i = threadIdx.x;
-    if(i<sM){
-        int2 K;
-        int2 P;
-        if(i>sA){
-            K = {i-sA,sA};
-            P = {sA,i-sA};
-        }
-        else{
-            K = {0,i};
-            P = {i,0};
-        }
-        while(1){
-            int offset = int(abs(K.y-P.y)/2);
-            int2 Q = {K.x+offset,K.y-offset};
-            if(Q.y >= 0 && Q.x <= sB && (Q.y == sA || Q.x == 0 || A[Q.y] > B[Q.x-1])){
-                if(Q.x==sB || Q.y==0 || A[Q.y-1]<=B[Q.x]){
-                   if(Q.y < sA && (Q.x == sB || A[Q.y]<=B[Q.x])){
-                        M[i] = A[Q.y];
-                   }
-                   else{
-                        M[i] = B[Q.x];
-                   }
-                   break;
-                }
-                else{
-                   K = {Q.x+1,Q.y-1};
-                }
-            }
-            else{
-                P = {Q.x-1,Q.y+1};
-            }
-        }
-    }
-}
+
+//_______________________________________________________________________Question 2____________________________________________________________________________________________________
 
 __device__ void merged_k_ldg(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M,int sA, int sB, int sM){
     // each block will launch this one 
@@ -300,9 +304,6 @@ __device__ void merged_k(const int *__restrict__ A,const int *__restrict__ B,int
     }
 }
 
-
-//_______________________________________________________________________Question 2____________________________________________________________________________________________________
-
 __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
     // try blocks of 32-64 thread to load in shared only on give the result
     
@@ -362,11 +363,6 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
     printf("thread %6.d, has to work on \tA[%6d]->A[%6d]\tB[%6d]->B[%6d]\tM[%6.d]\n",blockDim.x*blockIdx.x + threadIdx.x,path[2*i],path[2*(i+1)],path[2*(i)+1],path[2*(i+1)+1],   blockDim.x*blockIdx.x  );   
     #endif
     if(blockDim.x*blockIdx.x+threadIdx.x < m) merged_k(&A[  path[2*i]  ],&B[  path[(2*i)+1]  ], &M[  blockDim.x*blockIdx.x ],    path[  2*(i+1)  ] - path[2*i]     ,    path[2*(i+1)+1] - path[2*i+1]    ,   path[2*(i+1)] - path[2*i]+ path[2*(i+1)+1] - path[2*i+1]     );
-}
-
-// all thread will do a simple diagonal search
-__global__ void pathBig_k_naive (const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ path,const int sA,const int sB,const int sM){
-    
 }
 
 __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
