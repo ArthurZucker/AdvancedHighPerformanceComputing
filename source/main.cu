@@ -15,7 +15,7 @@ using namespace std;
 #define TEXTURE 0 //set to 0 to use normal memory, else it will use texture memory for A and B
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 5
+#define QUESTION 2
 #define INFO 0
 /*
 TO DO :
@@ -222,7 +222,6 @@ int main(int argc, char* argv[]) {
     cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
     //____________________________________________
 
-    // for(int i = 0;i<sizeA;i++)printf("A[%d]=%d\n",i,A[i]);
     #endif
 
     //___________________________Question 2_________________________________
@@ -387,13 +386,11 @@ int main(int argc, char* argv[]) {
     for(int i = 0;i<N;i++){ 
         sizeA = rand()%d+1;
         sizeB = (d-sizeA);
-        // printf("|A| = %d, |B| = %d\n",sizeA,sizeB);
         host_all_size_A[i] = sizeA;
         host_all_size_B[i] = sizeB;
         size_all_A += sizeA;
         size_all_B +=sizeB;
     }
-    // printf("size_all_A = %d, size_all_B = %d, size_all_A + size_all_B = %d, size_all_M = %d\n",size_all_A,size_all_B,size_all_A+size_all_B,N*d);
 
     // we stocked Ai and Bi in one table M : M = (A1|B1|...|AN|BN) 
     // allocation on device for M and STM of size N*d (N arrays of size d)
@@ -405,18 +402,14 @@ int main(int argc, char* argv[]) {
     // Start initialisation of the first arrays A0 and B0
     if(host_all_size_A[0]!=0){
         host_all_M[0]=rand()%20+1;
-        // printf("M[0]=%d\n",host_all_M[0]);
         for(int j = 1;j<host_all_size_A[0];j++){
             host_all_M[j]=host_all_M[j-1]+rand()%20+1;
-            // printf("M[%d]=%d\n",j,host_all_M[j]);
         }
     }
     if(host_all_size_B[0]!=0){
         host_all_M[host_all_size_A[0]]=rand()%20+1;
-        // printf("M[%d]=%d\n",host_all_size_A[0],host_all_M[host_all_size_A[0]]);
         for(int j = host_all_size_A[0]+1;j<host_all_size_B[0]+host_all_size_A[0];j++){
             host_all_M[j]=host_all_M[j-1]+rand()%20+1;
-            // printf("M[%d]=%d\n",j,host_all_M[j]);
         }
     }
     
@@ -522,7 +515,6 @@ int main(int argc, char* argv[]) {
     for(int i = 0;i<N;i++){ 
         sizeA = rand()%d+1;
         sizeB = (d-sizeA);
-        // printf("|A| = %d, |B| = %d\n",sizeA,sizeB);
         all_size_A[i] = sizeA;
         all_size_B[i] = sizeB;
         size_all_A += sizeA;
@@ -540,18 +532,14 @@ int main(int argc, char* argv[]) {
     // Start initialisation of the first arrays A0 and B0
     if(all_size_A[0]!=0){
         all_M[0]=rand()%20+1;
-        // printf("M[0]=%d\n",all_M[0]);
         for(int j = 1;j<all_size_A[0];j++){
             all_M[j]=all_M[j-1]+rand()%20+1;
-            // printf("M[%d]=%d\n",j,all_M[j]);
         }
     }
     if(all_size_B[0]!=0){
         all_M[all_size_A[0]]=rand()%20+1;
-        // printf("M[%d]=%d\n",all_size_A[0],all_M[all_size_A[0]]);
         for(int j = all_size_A[0]+1;j<all_size_B[0]+all_size_A[0];j++){
             all_M[j]=all_M[j-1]+rand()%20+1;
-            // printf("M[%d]=%d\n",j,all_M[j]);
         }
     }
     tmp_A=all_size_A[0];
@@ -575,7 +563,7 @@ int main(int argc, char* argv[]) {
             tmp_B+= all_size_B[i];
         }
     }
-    // copy all_M on h_all_M on the device
+    // copy all_M on h_all_M on device
     testCUDA(cudaMemcpy(h_all_M, all_M, N*d*sizeof(int), cudaMemcpyHostToDevice));
 
     printf("_________________ LDG_____________________\n");
@@ -589,7 +577,7 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
     printf("elapsed time : %f ms\n",TimeVar);
 
-    // retrieve STM 
+    // retrieve STM on device
     testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
 
     // _______________Check results_______________
@@ -802,7 +790,6 @@ int main(int argc, char* argv[]) {
             fprintf(f, "%d,%d,%f\n",N,d,TimeVar);
             testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
 
-            // for(int i = 0;i<N*d; i++) printf("sorted M[%d]=%d\n",i,all_STM[i]);
             // _______________Check results_______________
             int all_sorted=1;
             int sorted;
