@@ -35,7 +35,7 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 4   /**< Choose from {1,2,3,4,5} depending on the question */
+#define QUESTION 5   /**< Choose from {1,2,3,4,5} depending on the question */
 #define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
 
@@ -73,7 +73,9 @@ int main(int argc, char* argv[]) {
         else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
         int sizeM = sizeA+sizeB;
         printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-        int *hostA,*thostA,*hostB,*thostB,*hostM,*hA,*hB,*hM;
+    #if QUESTION ==1
+        int *hostA,*thostA,*hostB,*thostB,*hostM,*thostM;
+    #endif
         int *seqM = (int *) malloc(sizeM*sizeof(int));
         int *A = (int *) malloc(sizeA*sizeof(int));
         int *B = (int *) malloc(sizeB*sizeof(int));
