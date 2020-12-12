@@ -6,7 +6,7 @@
  ****************************************************************************/
 
 /**
- * @file doxygen_c.h
+ * @file main.cu
  * @author Arthur Zucker & Clément Apavou  
  * @date 912 Dec 2020
  * @brief Main file used to produce results for each questions
