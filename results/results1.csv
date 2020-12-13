@@ -1,0 +1,9 @@
+type,memory,time
+Sequential,,0.002000
+Normal,ZeroCpy,0.027104
+Shared,ZeroCpy,0.013120
+Ldg,ZeroCpy,0.014528
+Texture,ZeroCpy,0.013536
+Normal,MemCpy,0.010432
+Shared,MemCpy,0.010752
+Ldg,MemCpy,0.010464
