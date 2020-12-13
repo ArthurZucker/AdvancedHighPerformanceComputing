@@ -12,11 +12,10 @@ palette = sns.color_palette("rocket_r")
 sns.barplot(
     data=df,
     x="time", y="type",
-    hue="memory",palette=palette,
-    height=5, aspect=.75
+    hue="memory",palette=palette
 )
 plt.show()
-
+plt.savefig("question1.svg", format="svg")
 
 # ______________________Question 2_____________________________
 
@@ -24,11 +23,10 @@ df = pd.read_csv("results2.csv",usecols=["Kernel","type","memory", "time"])
 palette = sns.color_palette("rocket_r")
 sns.barplot(
     data=df,
-    x="time", y="type",palette=palette,
-    height=5, aspect=.75, facet_kws=dict(sharex=False),
+    x="time", y="type",palette=palette
 )
 plt.show()
-
+plt.savefig("question2.svg", format="svg")
 
 
 # ______________________Question 3_____________________________
@@ -38,18 +36,17 @@ sns.relplot(x="d", y="time", kind="line", data=df)
 plt.show()
 plt.savefig("question3.svg", format="svg")
 
-# ______________________Question 1_____________________________
+# ______________________Question 4_____________________________
 
 df = pd.read_csv("results4.csv",usecols=["type","memory", "time"])
 palette = sns.color_palette("rocket_r")
 sns.barplot(
     data=df,
     x="time", y="type",
-    hue="memory",palette=palette,
-    height=5, aspect=.75
+    hue="memory",palette=palette
 )
 plt.show()
-
+plt.savefig("question4.svg", format="svg")
 
 # ______________________Question 5_____________________________
 df = pd.read_csv("results5.csv",usecols=["N","d", "time"])

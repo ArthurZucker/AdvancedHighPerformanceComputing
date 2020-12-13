@@ -5,4 +5,4 @@ Normal,ZeroCpy,9.868576
 Ldg,Memcpy,0.210624
 Shared,Memcpy,0.191584
 Normal,Memcpy,0.199136
-Quicksort,,0.199136
+Quicksort,Normal,0.199136

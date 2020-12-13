@@ -1,5 +1,5 @@
 type,memory,time
-Sequential,,0.002000
+Sequential,Normal,0.002000
 Normal,ZeroCpy,0.027104
 Shared,ZeroCpy,0.013120
 Ldg,ZeroCpy,0.014528
