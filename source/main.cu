@@ -434,7 +434,7 @@ int main(int argc, char* argv[]) {
         fprintf(f, "type,memory,time\n");
         // N arrays containing Ai and Bi such as |Ai| + |Bi| = d
         // N arrays of size d
-        int N = 10000; // max 1000000
+        int N = 1000000; // max 1000000
         int d = 500; 
         if (argc > 2) {
             N = atoi(argv[1]);

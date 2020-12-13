@@ -1,9 +1,9 @@
 type,memory,time
-Sequential,CPU,0.005000
-Normal,ZeroCpy,0.027200
-Shared,ZeroCpy,0.012864
-Ldg,ZeroCpy,0.014656
-Texture,ZeroCpy,0.014464
-Normal,MemCpy,0.009696
-Shared,MemCpy,0.010848
-Ldg,MemCpy,0.011424
+Sequential,CPU,0.003000
+Normal,ZeroCpy,0.023456
+Shared,ZeroCpy,0.012704
+Ldg,ZeroCpy,0.012000
+Texture,ZeroCpy,0.011200
+Normal,MemCpy,0.008064
+Shared,MemCpy,0.010496
+Ldg,MemCpy,0.009472
