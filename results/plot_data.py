@@ -4,9 +4,10 @@ import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 from scipy import stats
-sns.set_style('darkgrid', rc={"lines.linewidth": 2})
-sns.set(font_scale=30)
-sns.set(rc={'figure.figsize':(25,14)})
+from matplotlib import rcParams
+sns.set_style('darkgrid')
+sns.set(font_scale=2)
+rcParams['figure.figsize'] = 11.7,8.27  
 # ______________________Question 1_____________________________
 
 df = pd.read_csv("results1.csv",usecols=["type","memory", "time"])
@@ -17,9 +18,7 @@ sns.barplot(
     hue="memory",palette=palette
 )
 plt.title('Comparison of the execution time for mergeSmall_k, with |M|<1024')
-plt.savefig("question1.svg", format="svg", bbox_inches='tight')
-plt.show()
-
+plt.savefig("question1.svg", format="svg")
 
 # ______________________Question 2_____________________________
 
@@ -34,26 +33,8 @@ g=sns.catplot(
 .set_titles("{col_name} {col_var}")
 .despine(left=True)
 ) 
+plt.title('Comparison of the execution time for merge sort w.r.t d')
 plt.savefig("question2.svg", format="svg", bbox_inches='tight')
-plt.show()
-
-
-df = pd.read_csv("results4.csv",usecols=["col","type","memory", "time"])
-palette = sns.color_palette("rocket_r")
-palette = sns.color_palette("rocket_r")
-
-g=sns.catplot(
-    data=df,
-    x="type", y="time",hue="memory",col="col",palette=palette,kind="bar",ci=None,sharey=False,sharex=False
-)
-(g.set_axis_labels("", "time")
-.set_titles("{col_name} {col_var}")
-.despine(left=True)
-) 
-
-plt.savefig("question4b2.svg", format="svg", bbox_inches='tight')
-plt.show()
-
 # ______________________Question 3_____________________________
 df = pd.read_csv("results3.csv",usecols=["d", "time"])
 print(df)
@@ -61,8 +42,6 @@ sns.lineplot(x="d", y="time", data=df)
 
 plt.title('Comparison of the execution time for merge sort w.r.t d')
 plt.savefig("question3.svg", format="svg", bbox_inches='tight')
-plt.show()
-
 
 # ______________________Question 4_____________________________
 
@@ -85,7 +64,7 @@ sns.catplot(ax=axes[1],
     hue="memory",palette=palette,kind="bar"
 )
 fig.savefig("question4.svg", format="svg", bbox_inches='tight')
-plt.show()
+
 
 
 
@@ -101,7 +80,7 @@ sns.catplot(
 )
 plt.title('Comparison of the execution time for mergeSmallBatch_k w.r.t the type of memory')
 plt.savefig("question4b.svg", format="svg", bbox_inches='tight')
-plt.show()
+
 
 
 # ______________________Question 5_____________________________
@@ -114,4 +93,3 @@ sns.lineplot(
 )
 plt.title('Comparison of the execution time for mergeSmallBatch_k (using shared memory) w.r.t d')
 plt.savefig("question5.svg", format="svg", bbox_inches='tight')
-plt.show()
