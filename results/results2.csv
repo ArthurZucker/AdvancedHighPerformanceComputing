@@ -1,0 +1,9 @@
+Kernel,type,memory,time
+Path,Normal,MemCopy,0.020320
+Merge,Normal,MemCopy,0.008736
+Path,Normal,ZeroCpy,0.018560
+Merge,Normal,ZeroCpy,0.012160
+Path,Naive,MemCpy,0.005888
+Path,Naive,MemCpy,0.122976
+Path,Naive,ZeroCpy,0.012896
+Merge,Naive,ZeroCpy,0.212832

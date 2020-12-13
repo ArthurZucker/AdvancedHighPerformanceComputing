@@ -35,7 +35,7 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 4  /**< Choose from {1,2,3,4,5} depending on the question */
+#define QUESTION 5  /**< Choose from {1,2,3,4,5} depending on the question */
 #define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
 
@@ -99,6 +99,8 @@ int main(int argc, char* argv[]) {
 
     //___________________________ Question 1 _________________________________
     #if QUESTION == 1
+        FILE *f = fopen("../results/results1.csv", "w"); 
+        fprintf(f, "type,memory,time\n");
         // Copy 
         testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
         testCUDA(cudaMalloc((void **)&thostB,sizeB*sizeof(int)));
@@ -131,6 +133,7 @@ int main(int argc, char* argv[]) {
         clock_t end = clock();
         double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
         printf("elapsed time : %f ms\n",time_spent*1000);
+        fprintf(f, "Sequential,CPU,%f\n",time_spent*1000);
         cout<<"Check sorted : "<<is_sorted(seqM,sizeM)<<endl;
         //____________________________________________
 
@@ -144,6 +147,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Normal,ZeroCpy,%f\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
 
@@ -157,6 +161,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Shared,ZeroCpy,%f\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
 
@@ -170,6 +175,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Ldg,ZeroCpy,%f\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
 
@@ -183,6 +189,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Texture,ZeroCpy,%f\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
         
@@ -195,6 +202,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Normal,MemCpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(M, thostM, sizeM*sizeof(int), cudaMemcpyDeviceToHost)); // retrieve M on the device
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
         //____________________________________________
@@ -209,6 +217,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Shared,MemCpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(M, thostM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
         //____________________________________________
@@ -223,6 +232,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Ldg,MemCpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(M, thostM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
         //____________________________________________
@@ -235,11 +245,13 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaFreeHost(hostA));
         testCUDA(cudaFreeHost(hostB));
         testCUDA(cudaFreeHost(hostM));
+        fclose(f); 
     #endif
 
     //___________________________ Question 2_________________________________
     #if QUESTION==2
-        
+        FILE *f = fopen("../results/results2.csv", "w"); 
+        fprintf(f, "Kernel,type,memory,time\n");
         int *__restrict__ path;
         int nb_threads = 128;
         int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
@@ -260,6 +272,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Path,Normal,MemCopy,%f\n",TimeVar);
         //____________________________________________
         printf("__________________ Merg big normal _________________\n");
         testCUDA(cudaEventRecord(start,0));
@@ -268,6 +281,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Merge,Normal,MemCopy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
 
@@ -288,6 +302,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Path,Normal,ZeroCpy,%f\n",TimeVar);
         //____________________________________________
         printf("__________________ Merg big zero copy _________________\n");
         testCUDA(cudaEventRecord(start,0));
@@ -296,6 +311,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Merge,Normal,ZeroCpy,%f\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hzM,sizeM)<<endl;
 
         //_________________________ Path and Merge naive ___________________
@@ -306,6 +322,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Path,Naive,MemCpy,%f\n",TimeVar);
         //____________________________________________
         printf("__________________ Merg big NAIVE_________________\n");
         testCUDA(cudaEventRecord(start,0));
@@ -314,8 +331,30 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Path,Naive,MemCpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
+
+        //_________________________ Path and Merge naive zero copy___________________
+        printf("__________________ Path big for naive merge zero copy___________________\n");
+        testCUDA(cudaEventRecord(start,0));
+        pathBig_k<<<nb_blocks,1>>>(hzA,hzB,path,sizeA,sizeB,sizeM);
+        testCUDA(cudaEventRecord(stop,0));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Path,Naive,ZeroCpy,%f\n",TimeVar);
+        //____________________________________________
+        printf("__________________ Merg big NAIVE zero copy__________________\n");
+        testCUDA(cudaEventRecord(start,0));
+        merged_Big_k_naive<<<nb_blocks,1>>>(hzA,hzB,hzM,path,sizeM);
+        testCUDA(cudaEventRecord(stop,0));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Merge,Naive,ZeroCpy,%f\n",TimeVar);
+        cout<<"Check sorted : "<<is_sorted(hzM,sizeM)<<endl;
+        fclose(f); 
     #endif
 
     //___________________________ Question 3_________________________________
@@ -391,6 +430,8 @@ int main(int argc, char* argv[]) {
         
     //___________________________ Question 4_________________________________
     #if QUESTION==4
+        FILE *f = fopen("../results/results4.csv", "w"); 
+        fprintf(f, "type,memory,time\n");
         // N arrays containing Ai and Bi such as |Ai| + |Bi| = d
         // N arrays of size d
         int N = 10000; // max 1000000
@@ -482,7 +523,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-
+        fprintf(f, "Ldg,ZeroCpy,%f\n",TimeVar);
         // _______________Check results_______________
         int all_sorted=1;
         int sorted;
@@ -512,7 +553,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-
+        fprintf(f, "Shared,ZeroCpy,%f\n",TimeVar);
         // _______________Check results_______________
         all_sorted=1;
         for(int i = 0;i<N*d;i+=d){
@@ -541,7 +582,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-    
+        fprintf(f, "Normal,ZeroCpy,%f\n",TimeVar);
         // _______________Check results_______________
         all_sorted=1;
         for(int i = 0;i<N*d;i+=d){
@@ -642,7 +683,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-
+        fprintf(f, "Ldg,Memcpy,%f\n",TimeVar);
         // retrieve STM on device
         testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
 
@@ -671,6 +712,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
+        fprintf(f, "Shared,Memcpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
 
         // _______________Check results_______________
@@ -701,7 +743,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-
+        fprintf(f, "Normal,Memcpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
 
         // _______________Check results_______________
@@ -729,7 +771,7 @@ int main(int argc, char* argv[]) {
         clock_t end = clock();
         double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
         printf("elapsed time : %f ms\n",time_spent*1000);
-
+        fprintf(f, "Quicksort,CPU,%f\n",TimeVar);
         // _______________Check results_______________
         all_sorted=1;
         for(int i = 0;i<N*d;i+=d){
@@ -762,6 +804,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaFreeHost(host_all_STM));
         testCUDA(cudaFreeHost(host_all_size_A));
         testCUDA(cudaFreeHost(host_all_size_B));
+        fclose(f); 
     #endif
 
     //___________________________ Question 5__________________________________
@@ -852,7 +895,7 @@ int main(int argc, char* argv[]) {
                 int numBlocks = N; //big number
                 int threadsPerBlock = d; // multiple of d
                 testCUDA(cudaEventRecord(start));
-                mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
+                mergeSmallBatch_k_shared<<<numBlocks,threadsPerBlock,d*sizeof(int)>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
                 testCUDA(cudaEventRecord(stop));
                 testCUDA(cudaEventSynchronize(stop));
                 testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -894,6 +937,7 @@ int main(int argc, char* argv[]) {
     * Part 3 : ideads     
    
     */
+    
     //___________ Cleaning up ____________________
     #if QUESTION == 2||QUESTION==1
     free(A);
