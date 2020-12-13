@@ -2,8 +2,8 @@ CC = nvcc
 SRC = $(wildcard *.cu)
 OBJ = $(SRC:.cu=.o)
 EXEC = main 
-LIBFLAGS = -g -pg -Xptxas=-v -arch=sm_35
-CCFLAGS = -rdc=true -arch=sm_35
+LIBFLAGS = -g -pg #-Xptxas=-v -arch=sm_35
+CCFLAGS =  -rdc=true #-arch=sm_35
 all : $(EXEC)
 
 $(EXEC) : $(OBJ)
