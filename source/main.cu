@@ -771,7 +771,7 @@ int main(int argc, char* argv[]) {
         clock_t end = clock();
         double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
         printf("elapsed time : %f ms\n",time_spent*1000);
-        fprintf(f, "Quicksort,CPU,%f\n",time_spent);
+        fprintf(f, "Quicksort,CPU,%f\n",time_spent*1000);
         // _______________Check results_______________
         all_sorted=1;
         for(int i = 0;i<N*d;i+=d){

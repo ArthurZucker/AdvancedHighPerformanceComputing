@@ -1,8 +1,8 @@
 type,memory,time
-Ldg,ZeroCpy,10.190624
-Shared,ZeroCpy,10.119488
-Normal,ZeroCpy,10.070816
-Ldg,Memcpy,0.214752
-Shared,Memcpy,0.192288
-Normal,Memcpy,0.198400
-Quicksort,CPU,0.089991
+Ldg,ZeroCpy,10.057728
+Shared,ZeroCpy,9.952000
+Normal,ZeroCpy,9.962528
+Ldg,Memcpy,0.210720
+Shared,Memcpy,0.190592
+Normal,Memcpy,0.197632
+Quicksort,CPU,89.939000
