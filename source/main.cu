@@ -35,7 +35,7 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 3  
+#define QUESTION 1  
 #define INFO 0    
 
 
