@@ -67,18 +67,12 @@ plt.show()
 
 
 # ______________________Question 5_____________________________
-df = pd.read_csv("results5.csv",usecols=["N","d", "time"])
-# plt.figure(1)
-# plot = 521
-N=10
-
-palette = sns.color_palette("rocket_r")
-
-# Plot the lines on two facets
+df = pd.read_csv("results5.csv",usecols=["N","d","time"])
+df["N"] = df["N"].astype(str)
 sns.lineplot(
     data=df,
     x="d", y="time",
-    hue="N"
+    hue="N",palette=["b", "g", "r", "indigo", "k","cyan"]
 )
 plt.title('Comparison of the execution time for mergeSmallBatch_k (using shared memory) w.r.t d')
 mng = plt.get_current_fig_manager()
