@@ -28,7 +28,7 @@ using namespace std;
 
 __device__ void merged_path_seq_device(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b){
     /**
-    * Sequential merge using the code from the article
+    * Sequential merge for a thread using the code from the article
     * @param A an array of ints to merge with @param B into @param M
     * @param a @param b respective sizes of the arrays
     * @see main()
@@ -54,7 +54,14 @@ __device__ void merged_path_seq_device(const int *__restrict__ A,const int *__re
 }
 
 void merged_path_seq(const int *__restrict__ A,const int *__restrict__ B, int *__restrict__ M,const int a, const int b){
-	int m = a+b;
+    /**
+    * Sequential merge using the code from the article
+    * @param A an array of ints to merge with @param B into @param M
+    * @param a @param b respective sizes of the arrays
+    * @see main()
+    * @return Nothing, M is sorted in place
+    */
+    int m = a+b;
 	int i = 0;
 	int j = 0;
 	while(i+j<m){
@@ -419,7 +426,7 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
     }
 }
 
-__global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, const int *__restrict__ path, const int m){
+__global__ void merged_Big_k(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, const int *__restrict__ path, const int m){
     /**
     * Merge two arrays from a given path.
     * @param A an array of ints to merge with @param B into @param M
@@ -442,9 +449,9 @@ __global__ void    merged_Big_k(const int *__restrict__ A,const int *__restrict_
     if(blockDim.x*blockIdx.x+threadIdx.x < m) merged_k(&A[  path[2*i]  ],&B[  path[(2*i)+1]  ], &M[  blockDim.x*blockIdx.x ],    path[  2*(i+1)  ] - path[2*i]     ,    path[2*(i+1)+1] - path[2*i+1]    ,   path[2*(i+1)] - path[2*i]+ path[2*(i+1)+1] - path[2*i+1]     );
 }
 
-__global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
+__global__ void merged_Big_k_naive(const int *__restrict__ A,const int *__restrict__ B,int *__restrict__ M, int *__restrict__ path, const int m){
      /**
-    * Naive Merge two arrays from a given path.
+    * Naive Merge two arrays from a given path. A Single thread merges an array
     * @param A an array of ints to merge with @param B into @param M
     * @param sA, @param sB, @param sM respective sizes of the arrays
     * @param path contains the indexes in A and B at the diagonal point 
@@ -454,7 +461,7 @@ __global__ void    merged_Big_k_naive(const int *__restrict__ A,const int *__res
     * this has to be called on the maximum number of threads
     */
     int i = blockDim.x*blockIdx.x + threadIdx.x;
-    merged_path_seq_device(&A[path[2*i]],&B[path[2*i+1]], &M[i],path[2*i+2]-path[2*i], path[2*i+3]-path[2*i]);
+    merged_path_seq_device(&A[path[2*i]],&B[path[2*i+1]], &M[i],path[2*(i+1)]-path[2*i], path[2*(i+1)+1]-path[2*i+1]);
 
 }
 

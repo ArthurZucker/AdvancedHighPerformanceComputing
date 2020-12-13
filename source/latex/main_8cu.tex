@@ -1,0 +1,71 @@
+\hypertarget{main_8cu}{}\doxysection{main.\+cu File Reference}
+\label{main_8cu}\index{main.cu@{main.cu}}
+
+
+Main file used to produce results for each questions.  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$iterator$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}merge.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}batch\+\_\+merge.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}utils.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{main_8cu_ab2270c55914e042a4adbefefc9d397bc}\label{main_8cu_ab2270c55914e042a4adbefefc9d397bc}} 
+\#define {\bfseries test\+C\+U\+DA}(error)~(test\+C\+U\+DA(error, \+\_\+\+\_\+\+F\+I\+L\+E\+\_\+\+\_\+ , \+\_\+\+\_\+\+L\+I\+N\+E\+\_\+\+\_\+))
+\item 
+\mbox{\Hypertarget{main_8cu_a1724c8cc9ef724fc188a586e3327d773}\label{main_8cu_a1724c8cc9ef724fc188a586e3327d773}} 
+\#define {\bfseries Q\+U\+E\+S\+T\+I\+ON}~3
+\item 
+\mbox{\Hypertarget{main_8cu_ae1103fea1e1b3c41ca3322d5389f7162}\label{main_8cu_ae1103fea1e1b3c41ca3322d5389f7162}} 
+\#define {\bfseries I\+N\+FO}~0
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{main_8cu_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{main_8cu_acb926a76bfbe2c16e9bdc7eff14b2543}\label{main_8cu_acb926a76bfbe2c16e9bdc7eff14b2543}} 
+texture$<$ int $>$ {\bfseries texture\+\_\+referenceA}
+\item 
+\mbox{\Hypertarget{main_8cu_aea49278e3e45491dd3cf45876cf9f98b}\label{main_8cu_aea49278e3e45491dd3cf45876cf9f98b}} 
+texture$<$ int $>$ {\bfseries texture\+\_\+referenceB}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Main file used to produce results for each questions. 
+
+\begin{DoxyAuthor}{Author}
+Arthur Zucker \& Clément Apavou ~\newline
+ 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+12 Dec 2020
+\end{DoxyDate}
+In this porject, we tackled the M\+E\+R\+GE S\+O\+RT problem on G\+PU using C\+U\+DA. We answered questions from a subject. If you want to see the original Merge sort articles, \begin{DoxySeeAlso}{See also}
+\href{https://www.researchgate.net/profile/Oded-Green/publication/254462662_GPU_merge_path_a_GPU_merging_algorithm/links/543eeaa00cf2e76f02244884/GPU-merge-path-a-GPU-merging-algorithm.pdf}{\texttt{ https\+://www.\+researchgate.\+net/profile/\+Oded-\/\+Green/publication/254462662\+\_\+\+G\+P\+U\+\_\+merge\+\_\+path\+\_\+a\+\_\+\+G\+P\+U\+\_\+merging\+\_\+algorithm/links/543eeaa00cf2e76f02244884/\+G\+P\+U-\/merge-\/path-\/a-\/\+G\+P\+U-\/merging-\/algorithm.\+pdf}} 
+
+\href{https://arxiv.org/pdf/1406.2628.pdf}{\texttt{ https\+://arxiv.\+org/pdf/1406.\+2628.\+pdf}} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{main_8cu_a0ddf1224851353fc92bfbff6f499fa97}\label{main_8cu_a0ddf1224851353fc92bfbff6f499fa97}} 
+\index{main.cu@{main.cu}!main@{main}}
+\index{main@{main}!main.cu@{main.cu}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+Part 3 \+: ideads ~\newline

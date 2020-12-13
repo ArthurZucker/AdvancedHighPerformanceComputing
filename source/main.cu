@@ -35,8 +35,8 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 1  
-#define INFO 0    
+#define QUESTION 2  /**< Choose from {1,2,3,4,5} depending on the question */
+#define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
 
 int main(int argc, char* argv[]) {
@@ -73,7 +73,9 @@ int main(int argc, char* argv[]) {
         else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
         int sizeM = sizeA+sizeB;
         printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-        int *hostA,*thostA,*hostB,*thostB,*hostM,*hA,*hB,*hM;
+    #if QUESTION ==1
+        int *hostA,*thostA,*hostB,*thostB,*hostM,*thostM;
+    #endif
         int *seqM = (int *) malloc(sizeM*sizeof(int));
         int *A = (int *) malloc(sizeA*sizeof(int));
         int *B = (int *) malloc(sizeB*sizeof(int));
@@ -98,7 +100,6 @@ int main(int argc, char* argv[]) {
 
     //___________________________ Question 1 _________________________________
     #if QUESTION == 1
-        //___________ TO DO: explain texture memory ___________
         // Copy 
         testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
         testCUDA(cudaMalloc((void **)&thostB,sizeB*sizeof(int)));
@@ -123,10 +124,7 @@ int main(int argc, char* argv[]) {
         // via mapped pinned memory or host->device transfers.
 
         testCUDA(cudaHostAlloc(&hostM,sizeM*sizeof(int),cudaHostAllocMapped)); // in order to do zero copy
-        /*testCUDA(cudaHostGetDevicePointer((void **)&pM, (void *) hostM,0));
-        testCUDA(cudaHostGetDevicePointer((void **)&pA, (void *) hostA,0));
-        testCUDA(cudaHostGetDevicePointer((void **)&pB, (void *) hostB,0));
-        */
+ 
         //_______________ Sequential _________________
         printf("_______________ Sequential _________________\n");
         clock_t begin = clock();
@@ -148,21 +146,22 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){hostM[i]=0;}
 
         //___________ Zero copy Shared _________________________
         printf("________________ Zero copy Shared ___________________\n");
         testCUDA(cudaEventRecord(start));
         mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
-        //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
         testCUDA(cudaEventRecord(stop));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){hostM[i]=0;}
 
         //___________ Zero copy LDG ____________________________
         printf("_____________________ Zero copy LDG ___________________\n");
@@ -175,6 +174,8 @@ int main(int argc, char* argv[]) {
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
 
+        for(int i=0;i<sizeM;i++){hostM[i]=0;}
+
         //___________ Texture ________________________
         printf("________________ Texture ___________________\n");
         testCUDA(cudaEventRecord(start,0));
@@ -185,8 +186,6 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
-
-        for(int i=1;i<sizeA;i++){hostM[i]=0;}
         
         //_____________________________ Copy ______________________________________________________________
         printf("__________________________Copy________________________________\n");
@@ -199,22 +198,23 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         testCUDA(cudaMemcpy(M, thostM, sizeM*sizeof(int), cudaMemcpyDeviceToHost)); // retrieve M on the device
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){M[i]=0;}
 
         //___________ copy Shared _________________________
         printf("________________copy Shared ___________________\n");
         testCUDA(cudaEventRecord(start));
         mergeSmall_k_shared<<<1,sizeM,sizeM*sizeof(int)>>>(thostA,thostB,thostM,sizeA,sizeB,sizeM);
-        //mergeSmall_k_shared<<<1,sizeM>>>(hostA,hostB,hostM,sizeA,sizeB,sizeM);
         testCUDA(cudaEventRecord(stop));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
         testCUDA(cudaMemcpy(M, thostM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
-
         //____________________________________________
+
+        for(int i=0;i<sizeM;i++){M[i]=0;}
 
         //___________ copy LDG ____________________________
         printf("_____________________copy LDG ___________________\n");
@@ -240,7 +240,7 @@ int main(int argc, char* argv[]) {
 
     //___________________________ Question 2_________________________________
     #if QUESTION==2
-        printf("__________________ Path big normal __________________\n");
+        
         int *__restrict__ path;
         int nb_threads = 128;
         int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
@@ -249,11 +249,12 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaMalloc((void **)&hA,sizeA*sizeof(int)));
         testCUDA(cudaMalloc((void **)&hB,sizeB*sizeof(int)));
         testCUDA(cudaMalloc((void **)&hM,sizeM*sizeof(int)));
-
         testCUDA(cudaMemcpy(hA, A, sizeA*sizeof(int), cudaMemcpyHostToDevice));
         testCUDA(cudaMemcpy(hB, B, sizeB*sizeof(int), cudaMemcpyHostToDevice));
-
         testCUDA(cudaMalloc((void **)&path,2*(nb_blocks+1)*sizeof(int)));
+
+        //_________________________ Path and Merge global copy ___________________
+        printf("__________________ Path big normal __________________\n");
         testCUDA(cudaEventRecord(start,0));
         pathBig_k<<<nb_blocks,nb_threads>>>(hA,hB,path,sizeA,sizeB,sizeM);
         testCUDA(cudaEventRecord(stop,0));
@@ -270,25 +271,52 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
-        //print_t(hostM,sizeM);
-        // printf("__________________ Path big NAIVE __________________\n");
-        // testCUDA(cudaEventRecord(start,0));
-        // pathBig_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,path,sizeA,sizeB,sizeM);
-        // testCUDA(cudaEventRecord(stop,0));
-        // testCUDA(cudaEventSynchronize(stop));
-        // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-        // printf("elapsed time : %f ms\n",TimeVar);
+
+        //_________________________ Path and Merge zero copy ___________________
+        int *hzA,*hzB,*hzM;
+        testCUDA(cudaHostAlloc(&hzA,sizeA*sizeof(int),cudaHostAllocMapped)); //cudaHostAllocWriteCombined
+        testCUDA(cudaHostAlloc(&hzB,sizeB*sizeof(int),cudaHostAllocMapped));
+        hzA[0]=rand()%20;
+        hzB[0]=rand()%20;
+        for(int i=1;i<sizeA;i++){hzA[i]=hzA[i-1]+rand()%20+1;}
+        for(int i=1;i<sizeB;i++){hzB[i]=hzB[i-1]+rand()%20+1;}
+        testCUDA(cudaHostAlloc(&hzM,sizeM*sizeof(int),cudaHostAllocMapped));
+
+        printf("__________________ Path big zero copy __________________\n");
+        testCUDA(cudaEventRecord(start,0));
+        pathBig_k<<<nb_blocks,nb_threads>>>(hzA,hzB,path,sizeA,sizeB,sizeM);
+        testCUDA(cudaEventRecord(stop,0));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
         //____________________________________________
-        // printf("__________________ Merg big NAIVE_________________\n");
-        // testCUDA(cudaEventRecord(start,0));
-        // merged_Big_k_naive_ldg<<<(sizeM+1023)/1024,1024>>>(thostA,thostB,hostM,path,sizeM);
-        // testCUDA(cudaEventRecord(stop,0));
-        // testCUDA(cudaEventSynchronize(stop));
-        // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-        // printf("elapsed time : %f ms\n",TimeVar);
-        // cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
+        printf("__________________ Merg big zero copy _________________\n");
+        testCUDA(cudaEventRecord(start,0));
+        merged_Big_k<<<nb_blocks,nb_threads>>>(hzA,hzB,hzM,path,sizeM);
+        testCUDA(cudaEventRecord(stop,0));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
+        cout<<"Check sorted : "<<is_sorted(hzM,sizeM)<<endl;
+
+        //_________________________ Path and Merge naive ___________________
+        printf("__________________ Path big for naive merge __________________\n");
+        testCUDA(cudaEventRecord(start,0));
+        pathBig_k<<<nb_blocks,1>>>(hA,hB,path,sizeA,sizeB,sizeM);
+        testCUDA(cudaEventRecord(stop,0));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
         //____________________________________________
-        //____________________________________________
+        printf("__________________ Merg big NAIVE_________________\n");
+        testCUDA(cudaEventRecord(start,0));
+        merged_Big_k_naive<<<nb_blocks,1>>>(hA,hB,hM,path,sizeM);
+        testCUDA(cudaEventRecord(stop,0));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
+        testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
+        cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
     #endif
 
     //___________________________ Question 3_________________________________
@@ -364,14 +392,10 @@ int main(int argc, char* argv[]) {
         
     //___________________________ Question 4_________________________________
     #if QUESTION==4
-        //_________________________________________ Batch merge part ____________________________________________________
-        //___________________________Question 4_________________________________
-        // L’objectif est simplement de répartir les block de manière intelligente 
-        // sur l’ensemble des calculs Ai + Bi = Mi .
         // N arrays containing Ai and Bi such as |Ai| + |Bi| = d
         // N arrays of size d
-        int N = 100; // max 1000000
-        int d = 306; 
+        int N = 10000; // max 1000000
+        int d = 506; 
         
         // ________________________________________Zero Copy______________________________________________ 
 
@@ -420,7 +444,7 @@ int main(int argc, char* argv[]) {
                 host_all_M[j]=host_all_M[j-1]+rand()%20+1;
             }
         }
-        
+            
         // Initialisation of all arrays 
         int tmp_A=host_all_size_A[0];
         int tmp_B=host_all_size_B[0];
@@ -430,8 +454,8 @@ int main(int argc, char* argv[]) {
                 for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+host_all_size_A[i];j++){
                     host_all_M[j]=host_all_M[j-1]+rand()%20+1;
                 }
-                tmp_A+= host_all_size_A[i];
-        
+                    tmp_A+= host_all_size_A[i];
+            
             }
             if(host_all_size_B[i]!=0){
                 host_all_M[tmp_A+tmp_B]=rand()%20+1;
@@ -441,9 +465,6 @@ int main(int argc, char* argv[]) {
                 tmp_B+= host_all_size_B[i];
             }
         }
-
-        testCUDA(cudaEventCreate(&start));
-        testCUDA(cudaEventCreate(&stop));
         
         printf("_________________ LDG_____________________\n");
 
@@ -473,12 +494,14 @@ int main(int argc, char* argv[]) {
             printf("There is a table not sorted !\n");
         }
 
-        printf("_________________ Normal_____________________\n");
+        for(int i=0;i<d;i++){host_all_STM[i]=0;}
+
+        printf("_________________ Shared_____________________\n");
 
         numBlocks = N; //big number
         threadsPerBlock = d; // multiple de d
         testCUDA(cudaEventRecord(start));
-        mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(host_all_M,host_all_STM,host_all_size_A,host_all_size_B,d);
+        mergeSmallBatch_k_shared<<<numBlocks,threadsPerBlock,d*sizeof(int)>>>(host_all_M,host_all_STM,host_all_size_A,host_all_size_B,d);
         testCUDA(cudaEventRecord(stop));
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
@@ -499,7 +522,36 @@ int main(int argc, char* argv[]) {
         else{
             printf("There is a table not sorted !\n");
         }
-        
+
+        for(int i=0;i<d;i++){host_all_STM[i]=0;}
+
+        printf("_________________ Normal_____________________\n");
+
+        numBlocks = N; //big number
+        threadsPerBlock = d; // multiple de d
+        testCUDA(cudaEventRecord(start));
+        mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(host_all_M,host_all_STM,host_all_size_A,host_all_size_B,d);
+        testCUDA(cudaEventRecord(stop));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
+    
+        // _______________Check results_______________
+        all_sorted=1;
+        for(int i = 0;i<N*d;i+=d){
+            sorted = is_sorted(&host_all_STM[i],d);
+            if(sorted ==0){
+                cout<<"Check sorted : "<<sorted<<endl;
+                all_sorted = 0;
+            }
+        }
+        if(all_sorted==1){
+            printf("All table are sorted !\n");
+        }
+        else{
+            printf("There is a table not sorted !\n");
+        }
+
         // ________________________________________Copy______________________________________________ 
 
         printf("__________________________________Copy_______________________________________\n");
@@ -600,9 +652,38 @@ int main(int argc, char* argv[]) {
         if(all_sorted==1){
             printf("All table are sorted !\n");
         }
+
+        for(int i=0;i<d;i++){all_STM[i]=0;}
+
+        printf("_________________ Shared_____________________\n");
+
+        numBlocks = N; //big number
+        threadsPerBlock = d; // multiple de d
+        testCUDA(cudaEventRecord(start));
+        mergeSmallBatch_k_shared<<<numBlocks,threadsPerBlock,d*sizeof(int)>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
+        testCUDA(cudaEventRecord(stop));
+        testCUDA(cudaEventSynchronize(stop));
+        testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
+        printf("elapsed time : %f ms\n",TimeVar);
+        testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
+
+        // _______________Check results_______________
+        all_sorted=1;
+        for(int i = 0;i<N*d;i+=d){
+            sorted = is_sorted(&all_STM[i],d);
+            if(sorted ==0){
+                cout<<"Check sorted : "<<sorted<<endl;
+                all_sorted = 0;
+            }
+        }
+        if(all_sorted==1){
+            printf("All table are sorted !\n");
+        }
         else{
             printf("There is a table not sorted !\n");
         }
+
+        for(int i=0;i<d;i++){all_STM[i]=0;}
 
         printf("_________________ Normal_____________________\n");
 
@@ -632,34 +713,6 @@ int main(int argc, char* argv[]) {
         else{
             printf("There is a table not sorted !\n");
         }
-
-        // printf("_________________ Shared_____________________\n");
-
-        // numBlocks = N; //big number
-        // threadsPerBlock = d; // multiple de d
-        // testCUDA(cudaEventRecord(start));
-        // mergeSmallBatch_k_shared<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
-        // testCUDA(cudaEventRecord(stop));
-        // testCUDA(cudaEventSynchronize(stop));
-        // testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-        // printf("elapsed time : %f ms\n",TimeVar);
-        // testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
-
-        // // _______________Check results_______________
-        // all_sorted=1;
-        // for(int i = 0;i<N*d;i+=d){
-        //     sorted = is_sorted(&all_STM[i],d);
-        //     if(sorted ==0){
-        //         cout<<"Check sorted : "<<sorted<<endl;
-        //         all_sorted = 0;
-        //     }
-        // }
-        // if(all_sorted==1){
-        //     printf("All table are sorted !\n");
-        // }
-        // else{
-        //     printf("There is a table not sorted !\n");
-        // }
 
         // test on quicksort sequential to compare 
         printf("______________________________Quicksort sequential___________________________\n");
