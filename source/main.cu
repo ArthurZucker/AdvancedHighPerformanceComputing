@@ -35,12 +35,11 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 2  /**< Choose from {1,2,3,4,5} depending on the question */
+#define QUESTION 5  /**< Choose from {1,2,3,4,5} depending on the question */
 #define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
 
 int main(int argc, char* argv[]) {
-    cudaDeviceReset();
     //___________ Basic initialisation ___________
 	srand((unsigned int)time(NULL));
 	int nDevices;
@@ -395,7 +394,14 @@ int main(int argc, char* argv[]) {
         // N arrays containing Ai and Bi such as |Ai| + |Bi| = d
         // N arrays of size d
         int N = 10000; // max 1000000
-        int d = 506; 
+        int d = 500; 
+        if (argc > 2) {
+            N = atoi(argv[1]);
+            d = atoi(argv[2]);
+            if(d>1024) d=1024; 
+        } // If no arguments are provided, set random sizes
+        printf("N = %d | d = %d\n",N,d);
+        
         
         // ________________________________________Zero Copy______________________________________________ 
 
@@ -765,7 +771,11 @@ int main(int argc, char* argv[]) {
         FILE *f = fopen("../results/results5.csv", "w"); 
         fprintf(f, "N,d,time\n");
         // test for several value of N and d
-        for(int N = 10; N<1000000; N*=10){//10000000 max 
+        int Nmax = 1000000;
+        if(argc == 2){
+            if(atoi(argv[1])<Nmax) Nmax = atoi(argv[1]);
+        }
+        for(int N = 10; N<Nmax; N*=10){//10000000 max 
             for (int d = 2; d<=1024; d*=2){
                 int* all_M = (int *) malloc(N*d*sizeof(int));
                 int* all_STM = (int *) malloc(N*d*sizeof(int));
@@ -846,7 +856,7 @@ int main(int argc, char* argv[]) {
                 testCUDA(cudaEventRecord(stop));
                 testCUDA(cudaEventSynchronize(stop));
                 testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
-                printf("elapsed time for d = %d: %f ms\n",d,TimeVar);
+                printf("elapsed time : N = %10d, d = %10d: %f ms\t",N,d,TimeVar);
                 fprintf(f, "%d,%d,%f\n",N,d,TimeVar);
                 testCUDA(cudaMemcpy(all_STM, h_all_STM, N*d*sizeof(int), cudaMemcpyDeviceToHost));
 
@@ -861,10 +871,10 @@ int main(int argc, char* argv[]) {
                     }
                 }
                 if(all_sorted==1){
-                    printf("All table are sorted !\n");
+                    printf("Each array is sorted !\n");
                 }
                 else{
-                    printf("There is a table not sorted !\n");
+                    printf("There is an unsorted array !\n");
                 }
 
                 free(all_M);
@@ -892,5 +902,6 @@ int main(int argc, char* argv[]) {
     #endif 
 	testCUDA(cudaEventDestroy(start));
     testCUDA(cudaEventDestroy(stop));
+    cudaDeviceReset();
 	return 0;
 }
