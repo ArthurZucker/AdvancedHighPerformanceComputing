@@ -15,7 +15,7 @@ sns.barplot(
     x="time", y="type",
     hue="memory",palette=palette
 )
-plt.title('Comparaison des temps de calcul pour mergeSmall_k, avec |M|<1024')
+plt.title('Comparison of the execution time for mergeSmall_k, with |M|<1024')
 mng = plt.get_current_fig_manager()
 mng.full_screen_toggle()
 plt.savefig("question1.svg", format="svg", bbox_inches='tight')
@@ -30,7 +30,7 @@ sns.barplot(
     data=df,
     x="time", y="type",palette=palette
 )
-plt.title('Comparaison des temps de calcul pour mergeBig_k et pathBig_k')
+plt.title('Comparison of the execution time for mergeBig_k and pathBig_k')
 mng = plt.get_current_fig_manager()
 mng.full_screen_toggle()
 plt.savefig("question2.svg", format="svg", bbox_inches='tight')
@@ -43,7 +43,7 @@ df = pd.read_csv("results3.csv",usecols=["d", "time"])
 print(df)
 sns.lineplot(x="d", y="time", data=df)
 
-plt.title('Comparaison des temps de calcul pour merge sort en fonction de d')
+plt.title('Comparison of the execution time for merge sort w.r.t d')
 mng = plt.get_current_fig_manager()
 mng.full_screen_toggle()
 plt.savefig("question3.svg", format="svg", bbox_inches='tight')
@@ -59,7 +59,7 @@ sns.barplot(
     x="time", y="type",
     hue="memory",palette=palette
 )
-plt.title('Comparaison des temps de calcul pour mergeBatch_k en fonction des type de memoire')
+plt.title('Comparison of the execution time for mergeSmallBatch_k w.r.t the type of memory')
 mng = plt.get_current_fig_manager()
 mng.full_screen_toggle()
 plt.savefig("question4.svg", format="svg", bbox_inches='tight')
@@ -80,10 +80,8 @@ sns.lineplot(
     x="d", y="time",
     hue="N"
 )
-plt.title('Comparaison des temps de calcul pour mergeBatch_k en fonction de d')
+plt.title('Comparison of the execution time for mergeSmallBatch_k (using shared memory) w.r.t d')
 mng = plt.get_current_fig_manager()
 mng.full_screen_toggle()
-plt.savefig("question4.svg", format="svg", bbox_inches='tight')
+plt.savefig("question5.svg", format="svg", bbox_inches='tight')
 plt.show()
-
-
