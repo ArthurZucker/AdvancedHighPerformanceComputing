@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
         clock_t end = clock();
         double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
         printf("elapsed time : %f ms\n",time_spent*1000);
-        fprintf(f, "Sequential,,%f\n",time_spent*1000);
+        fprintf(f, "Sequential,CPU,%f\n",time_spent*1000);
         cout<<"Check sorted : "<<is_sorted(seqM,sizeM)<<endl;
         //____________________________________________
 
@@ -771,7 +771,7 @@ int main(int argc, char* argv[]) {
         clock_t end = clock();
         double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
         printf("elapsed time : %f ms\n",time_spent*1000);
-        fprintf(f, "Quicksort,,%f\n",TimeVar);
+        fprintf(f, "Quicksort,CPU,%f\n",TimeVar);
         // _______________Check results_______________
         all_sorted=1;
         for(int i = 0;i<N*d;i+=d){

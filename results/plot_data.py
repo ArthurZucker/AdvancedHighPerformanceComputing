@@ -3,7 +3,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy import stats
-sns.set_style('darkgrid')
+sns.set_style('darkgrid', rc={"lines.linewidth": 2})
+sns.set(font_scale=3)
 
 # ______________________Question 1_____________________________
 
@@ -14,8 +15,12 @@ sns.barplot(
     x="time", y="type",
     hue="memory",palette=palette
 )
+plt.title('Comparaison des temps de calcul pour mergeSmall_k, avec |M|<1024')
+mng = plt.get_current_fig_manager()
+mng.full_screen_toggle()
+plt.savefig("question1.svg", format="svg", bbox_inches='tight')
 plt.show()
-plt.savefig("question1.svg", format="svg")
+
 
 # ______________________Question 2_____________________________
 
@@ -25,16 +30,25 @@ sns.barplot(
     data=df,
     x="time", y="type",palette=palette
 )
+plt.title('Comparaison des temps de calcul pour mergeBig_k et pathBig_k')
+mng = plt.get_current_fig_manager()
+mng.full_screen_toggle()
+plt.savefig("question2.svg", format="svg", bbox_inches='tight')
 plt.show()
-plt.savefig("question2.svg", format="svg")
+
 
 
 # ______________________Question 3_____________________________
 df = pd.read_csv("results3.csv",usecols=["d", "time"])
 print(df)
-sns.relplot(x="d", y="time", kind="line", data=df)
+sns.lineplot(x="d", y="time", data=df)
+
+plt.title('Comparaison des temps de calcul pour merge sort en fonction de d')
+mng = plt.get_current_fig_manager()
+mng.full_screen_toggle()
+plt.savefig("question3.svg", format="svg", bbox_inches='tight')
 plt.show()
-plt.savefig("question3.svg", format="svg")
+
 
 # ______________________Question 4_____________________________
 
@@ -45,8 +59,12 @@ sns.barplot(
     x="time", y="type",
     hue="memory",palette=palette
 )
+plt.title('Comparaison des temps de calcul pour mergeBatch_k en fonction des type de memoire')
+mng = plt.get_current_fig_manager()
+mng.full_screen_toggle()
+plt.savefig("question4.svg", format="svg", bbox_inches='tight')
 plt.show()
-plt.savefig("question4.svg", format="svg")
+
 
 # ______________________Question 5_____________________________
 df = pd.read_csv("results5.csv",usecols=["N","d", "time"])
@@ -57,23 +75,15 @@ N=10
 palette = sns.color_palette("rocket_r")
 
 # Plot the lines on two facets
-sns.relplot(
+sns.lineplot(
     data=df,
     x="d", y="time",
-    hue="N",
-    kind="line", palette=palette,
-    height=5, aspect=.75, facet_kws=dict(sharex=False),
+    hue="N"
 )
+plt.title('Comparaison des temps de calcul pour mergeBatch_k en fonction de d')
+mng = plt.get_current_fig_manager()
+mng.full_screen_toggle()
+plt.savefig("question4.svg", format="svg", bbox_inches='tight')
 plt.show()
 
-for i in range(6):
-    temp_df = df[i*10:(i+1)*10]
-    print(temp_df)
-    # plt.subplot(plot)
-    sns.relplot(x="d", y="time", kind="line", data=temp_df)
-    plt.title('N='+str(N))
-    # plot+=1
-    N*=10
-
-plt.show()
 
