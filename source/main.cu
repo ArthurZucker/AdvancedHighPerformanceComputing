@@ -895,7 +895,7 @@ int main(int argc, char* argv[]) {
                 int numBlocks = N; //big number
                 int threadsPerBlock = d; // multiple of d
                 testCUDA(cudaEventRecord(start));
-                mergeSmallBatch_k<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
+                mergeSmallBatch_k_shared<<<numBlocks,threadsPerBlock>>>(h_all_M,h_all_STM,h_all_size_A,h_all_size_B,d);
                 testCUDA(cudaEventRecord(stop));
                 testCUDA(cudaEventSynchronize(stop));
                 testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
