@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.21)  23 NOV 2020 09:00
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.21)  13 DEC 2020 09:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1314,4 +1314,775 @@ LaTeX Font Info:    Font shape `LS2/libertinust1mathex/m/n' will be
 (Font)              scaled to size 17.28pt on input line 71.
 LaTeX Font Info:    Font shape `LS1/libertinust1mathbb/m/n' will be
 (Font)              scaled to size 24.88pt on input line 71.
-LaTeX 
+LaTeX Font Info:    Font shape `LS1/libertinust1mathbb/m/n' will be
+(Font)              scaled to size 20.74pt on input line 71.
+LaTeX Font Info:    Font shape `LS1/libertinust1mathbb/m/n' will be
+(Font)              scaled to size 17.28pt on input line 71.
+LaTeX Font Info:    Font shape `LS1/libertinust1math/b/n' will be
+(Font)              scaled to size 24.88pt on input line 71.
+LaTeX Font Info:    Font shape `LS1/libertinust1math/b/n' will be
+(Font)              scaled to size 20.74pt on input line 71.
+LaTeX Font Info:    Font shape `LS1/libertinust1math/b/n' will be
+(Font)              scaled to size 17.28pt on input line 71.
+LaTeX Font Info:    Font shape `LS1/libertinust1math/b/it' will be
+(Font)              scaled to size 24.88pt on input line 71.
+LaTeX Font Info:    Font shape `LS1/libertinust1math/b/it' will be
+(Font)              scaled to size 20.74pt on input line 71.
+LaTeX Font Info:    Font shape `LS1/libertinust1math/b/it' will be
+(Font)              scaled to size 17.28pt on input line 71.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
+(Font)              scaled to size 20.74pt on input line 71.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
+(Font)              scaled to size 17.28pt on input line 71.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/it' will be
+(Font)              scaled to size 24.88pt on input line 71.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/it' will be
+(Font)              scaled to size 20.74pt on input line 71.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/it' will be
+(Font)              scaled to size 17.28pt on input line 71.
+Package pdfrender Info: New color stack `TextRenderingMode' = 1 on input line 71.
+Package pdfrender Info: New color stack `LineWidth' = 2 on input line 71.
+
+Overfull \vbox (5.5148pt too high) detected at line 71
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[5
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 71
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[6
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 71
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[7
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 71
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[8
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 71
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[9
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 71
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[10
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 71
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[11
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 81
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[12
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 81
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[13
+
+] (/Users/arthur/Travail/Polytech/MAIN5/HPC/HPCA/Report/Chapters/01Thread1.tex
+Overfull \vbox (5.5148pt too high) detected at line 17
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[14
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 17
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[15
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 17
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[16
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 17
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[17
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 17
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[18
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 37
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[19
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 37
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[20
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 37
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[21
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 49
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[22
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 49
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[23
+
+]) (/Users/arthur/Travail/Polytech/MAIN5/HPC/HPCA/Report/Chapters/02Thread2.tex
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 20--20
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 20
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[24
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 20--20
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 20
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[25
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 20--20
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 20
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[26
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 20--20
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 20
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[27
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 20--20
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 20
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[28
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 20--20
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 20
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[29
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 20--20
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 20
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[30
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 42--42
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 42
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[31
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 42--42
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 42
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[32
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 56
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[33
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 56
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[34
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 74
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[35
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 74
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[36
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 88
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[37
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 88
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[38
+
+])
+Overfull \vbox (5.5148pt too high) detected at line 100
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[39
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 100
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[40
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 100
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[41
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 100
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[42
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 100
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[43
+
+] (/Users/arthur/Travail/Polytech/MAIN5/HPC/HPCA/Report/Chapters/03Thread9.tex
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 28--28
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 28
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[44
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 28--28
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 28
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[45
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 28--28
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 28
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[46
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 28--28
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 28
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[47
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 28--28
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 28
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[48
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 28--28
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 28
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[49
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 28--28
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 28
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[50
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 59--59
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 59
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[51
+
+]
+Overfull \hbox (6.03079pt too wide) in paragraph at lines 88--88
+[][]  
+ []
+
+
+Overfull \vbox (5.5148pt too high) detected at line 88
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[52
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 110
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[53
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 110
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[54
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 110
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[55
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 135
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[56
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 135
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[57
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 135
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[58
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 135
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[59
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 135
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[60
+
+]
+Overfull \vbox (5.5148pt too high) detected at line 135
+ []
+
+
+Overfull \hbox (1.50691pt too wide) has occurred while \output is active
+[][] 
+ []
+
+[61
+
+])
+\tf@nav=\write7
+\openout7 = `main.nav'.
+
+\tf@toc=\write8
+\openout8 = `main.toc'.
+
+\tf@snm=\write9
+\openout9 = `main.snm'.
+
+ (/Users/arthur/Travail/Polytech/MAIN5/HPC/HPCA/Report/main.aux) ) 
+Here is how much of TeX's memory you used:
+ 33852 strings out of 479485
+ 673026 string characters out of 5871977
+ 1125694 words of memory out of 5000000
+ 50007 multiletter control sequences out of 15000+600000
+ 664742 words of font info for 124 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 138i,20n,139p,501b,800s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/libertinust1math/libusSYM.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/libertine/lbtn_afusau.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/public/libertinust1math/LibertinusT1Math.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/libertine/LinBiolinumT.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/libertine/LinBiolinumTB.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/libertine/LinBiolinumTI.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb>
+Output written on /Users/arthur/Travail/Polytech/MAIN5/HPC/HPCA/Report/main.pdf (61 pages, 691389 bytes).
+PDF statistics:
+ 2918 PDF objects out of 2984 (max. 8388607)
+ 2765 compressed objects within 28 object streams
+ 124 named destinations out of 1000 (max. 500000)
+ 95 words of extra memory for PDF output out of 10000 (max. 10000000)
+
