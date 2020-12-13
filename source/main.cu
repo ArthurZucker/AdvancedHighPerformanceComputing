@@ -272,7 +272,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-        fprintf(f, "Path,Normal,MemCopy,%f\n",TimeVar);
+        fprintf(f, "Path,Normal,MemCpy,%f\n",TimeVar);
         //____________________________________________
         printf("__________________ Merg big normal _________________\n");
         testCUDA(cudaEventRecord(start,0));
@@ -281,7 +281,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-        fprintf(f, "Merge,Normal,MemCopy,%f\n",TimeVar);
+        fprintf(f, "Merge,Normal,MemCpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
 
@@ -331,7 +331,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaEventSynchronize(stop));
         testCUDA(cudaEventElapsedTime(&TimeVar, start, stop));
         printf("elapsed time : %f ms\n",TimeVar);
-        fprintf(f, "Path,Naive,MemCpy,%f\n",TimeVar);
+        fprintf(f, "Merge,Naive,MemCpy,%f\n",TimeVar);
         testCUDA(cudaMemcpy(M, hM, sizeM*sizeof(int), cudaMemcpyDeviceToHost));
         cout<<"Check sorted : "<<is_sorted(M,sizeM)<<endl;
 
