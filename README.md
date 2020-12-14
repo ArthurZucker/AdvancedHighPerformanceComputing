@@ -2,7 +2,7 @@
 GPU project on CUDA
 
 # Structure
-`
+```
 ├── results                 # Documentation files (alternatively `doc`)\\
 ├── source                  # Source files 
 │   ├── html
@@ -12,7 +12,7 @@ GPU project on CUDA
 │   ├── *.h
 ├── *.pdf					# pdf files corresponding to the subject and 
 └── README.md
-`
+```
 
 # 1. Results
 
