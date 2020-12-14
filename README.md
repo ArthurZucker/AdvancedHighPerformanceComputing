@@ -1,6 +1,5 @@
 # HPCA
-GPU project on CUDA
-@authors : Arthur Zucker & Clément Apavou
+GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou`
 
 # Structure
 ```
@@ -17,15 +16,4 @@ GPU project on CUDA
 ├── *.pdf					          # pdf files corresponding to the subject and the articles 
 └── README.md
 ```
-
-# 1. Results
-
-
-# 2. Source
-
-In order to compile the code 
-
-# 3. Documentation
-
-An automatically generated documentation can be found in `source/html/index.html`. 
 
