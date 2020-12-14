@@ -1,19 +1,22 @@
 # HPCA
-GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou`
+GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou` (MAIN)
 
 # Structure
 ```
 ├── results                 # Result files
+│   ├── graph_on_beamer     # graph on the beamer presentation
 │   ├── *.csv               # results written using the `main.cu`
 │   ├── *.svg               # figures
 │   ├── plot_data.py        # Used to get the svg files
-├── source                  # Source files 
+├── source                  # Source files
+│   ├── Doxyfile            # for doxygen documentation
 │   ├── html                # hmtl doxygen documentation, see `index.html` for the link
 │   ├── latex               # documentation
 │   ├── Makefile            # Makefile called using `make`
-│   ├── *.cu                # cuda files
+│   ├── *.cu                # cuda files , merge for the part 1 and batch_merge for the part 2, utils (several function that we used)
 │   ├── *.h                 # headers
-├── *.pdf					          # pdf files corresponding to the subject and the articles 
+├── *.pdf                   # beamer latex for the presentation of the project
 └── README.md
 ```
-
+# Utilisation
+On the line 35 of the main, you have to choose from {1,2,3,4,5} depending on the question that you want to launch.
