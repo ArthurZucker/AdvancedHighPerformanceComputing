@@ -3,9 +3,9 @@ GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou`
 
 # Structure
 ```
-├── results                 # Documentation files (alternatively `doc`)\\
+├── results                 # Result files
 │   ├── *.csv               # results written using the `main.cu`
-│   ├── *.svg
+│   ├── *.svg               # figures
 │   ├── plot_data.py        # Used to get the svg files
 ├── source                  # Source files 
 │   ├── html                # hmtl doxygen documentation
