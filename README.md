@@ -1,25 +1,26 @@
 # HPCA
 GPU project on CUDA
 
-# to do:
+# Structure
 
- - [ ] automatic documentation?
- - [x] sequential
-	- [x] test sequential
-	- [x] eval time
- - [ ] Question 1 to shared
- - [ ] Question 2
- - [ ] Question 3
- - [ ] Question 4
- - [ ] Question 5
- - [ ] `__ldg()`to increase perf
- - [ ] Add Offset to the beamer + thread 11 I think (showed in exemple)
+├── results                 # Documentation files (alternatively `doc`)
+├── source                  # Source files 
+│   ├── html
+│   ├── latex
+│   ├── Makefile			# Makefile called using `make`
+│   ├── *.cu
+│   ├── *.h
+├── *.pdf					# pdf files corresponding to the subject and 
+└── README.md
 
 
+# 1. Results
 
-# 1. Merge path and sort
+# 2. Source
 
-# 2. Batch merge
+In order to compile the code 
 
-# 3. Merge sort application 
+# 3. Documentation
+
+An automatically generated documentation can be found in `source/html/index.html`. 
 
