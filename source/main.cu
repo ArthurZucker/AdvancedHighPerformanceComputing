@@ -41,7 +41,7 @@ texture <int> texture_referenceB ;
 
 int main(int argc, char* argv[]) {
     //___________ Basic initialisation ___________
-	srand((unsigned int)time(NULL));
+	srand((unsigned int)time(NULL)); // random seed 
 	int nDevices;
 	cudaGetDeviceCount(&nDevices);
     // int Tmax;
@@ -62,8 +62,6 @@ int main(int argc, char* argv[]) {
     //Tmax =1024;
 	cudaSetDevice(0);
     testCUDA(cudaSetDeviceFlags(cudaDeviceMapHost));
-    //____________________________________________
-
     //___________ Initialising size of arrays  ___________
     #if QUESTION==2 || QUESTION ==1
         int sizeA,sizeB;
@@ -72,9 +70,9 @@ int main(int argc, char* argv[]) {
         else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
         int sizeM = sizeA+sizeB;
         printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-    #if QUESTION ==1
-        int *hostA,*thostA,*hostB,*thostB,*hostM,*thostM;
-    #endif
+        #if QUESTION ==1
+            int *hostA,*thostA,*hostB,*thostB,*hostM,*thostM;
+        #endif
         int *seqM = (int *) malloc(sizeM*sizeof(int));
         int *A = (int *) malloc(sizeA*sizeof(int));
         int *B = (int *) malloc(sizeB*sizeof(int));
@@ -95,8 +93,6 @@ int main(int argc, char* argv[]) {
     testCUDA(cudaEventCreate(&start));
 	testCUDA(cudaEventCreate(&stop));
     float TimeVar=0;
-
-
     //___________________________ Question 1 _________________________________
     #if QUESTION == 1
         FILE *f = fopen("../results/results1.csv", "w"); 
@@ -247,7 +243,6 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaFreeHost(hostM));
         fclose(f); 
     #endif
-
     //___________________________ Question 2_________________________________
     #if QUESTION==2
         FILE *f = fopen("../results/results2.csv", "w"); 
@@ -356,7 +351,6 @@ int main(int argc, char* argv[]) {
         cout<<"Check sorted : "<<is_sorted(hzM,sizeM)<<endl;
         fclose(f); 
     #endif
-
     //___________________________ Question 3_________________________________
     #if QUESTION==3
         int *__restrict__ hD;
@@ -427,7 +421,6 @@ int main(int argc, char* argv[]) {
         }
         fclose(f); 
     #endif
-        
     //___________________________ Question 4_________________________________
     #if QUESTION==4
         FILE *f = fopen("../results/results4.csv", "w"); 
@@ -806,9 +799,7 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaFreeHost(host_all_size_B));
         fclose(f); 
     #endif
-
     //___________________________ Question 5__________________________________
-   
     #if QUESTION == 5
         // We chose to use copy because it's faster than zero copy
         FILE *f = fopen("../results/results5.csv", "w"); 
@@ -932,12 +923,6 @@ int main(int argc, char* argv[]) {
         }
         fclose(f); 
     #endif
-
-    /**
-    * Part 3 : ideads     
-   
-    */
-    
     //___________ Cleaning up ____________________
     #if QUESTION == 2||QUESTION==1
     free(A);
