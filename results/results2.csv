@@ -1,9 +1,9 @@
 Kernel,type,memory,time
-Path,Normal,MemCopy,0.358464
-Merge,Normal,MemCopy,0.336160
-Path,Normal,ZeroCpy,12.452800
-Merge,Normal,ZeroCpy,32.640865
-Path,Naive,MemCpy,0.166208
-Path,Naive,MemCpy,1353.872437
-Path,Naive,ZeroCpy,6.879520
-Merge,Naive,ZeroCpy,2141.214111
+Path,Normal,MemCopy,0.017920
+Merge,Normal,MemCopy,0.008576
+Path,Normal,ZeroCpy,0.018336
+Merge,Normal,ZeroCpy,0.012928
+Path,Naive,MemCpy,0.005984
+Path,Naive,MemCpy,0.084992
+Path,Naive,ZeroCpy,0.011456
+Merge,Naive,ZeroCpy,0.140960
