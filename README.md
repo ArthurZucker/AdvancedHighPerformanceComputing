@@ -3,7 +3,7 @@ GPU project on CUDA
 
 # Structure
 `
-├── results                 # Documentation files (alternatively `doc`)
+├── results                 # Documentation files (alternatively `doc`)\\
 ├── source                  # Source files 
 │   ├── html
 │   ├── latex
