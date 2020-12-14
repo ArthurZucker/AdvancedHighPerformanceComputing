@@ -1,8 +1,5 @@
 /****************************************************************************
  * Copyright (C) 2020 by Arthur Zucker @ Apavou Clément                     *
- *                                                                          *
- * This file is part of Box.                                                *
- *
  ****************************************************************************/
 
 /**
@@ -35,7 +32,7 @@
 using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
-#define QUESTION 5  /**< Choose from {1,2,3,4,5} depending on the question */
+#define QUESTION 1  /**< Choose from {1,2,3,4,5} depending on the question */
 #define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
 
 
@@ -72,9 +69,9 @@ int main(int argc, char* argv[]) {
         else{sizeA=atoi(argv[1]);sizeB=atoi(argv[2]);}
         int sizeM = sizeA+sizeB;
         printf("|A| = %d, |B| = %d, |M| = %d\n",sizeA,sizeB,sizeM);
-    #if QUESTION ==1
-        int *hostA,*thostA,*hostB,*thostB,*hostM,*thostM;
-    #endif
+        #if QUESTION ==1
+            int *hostA,*thostA,*hostB,*thostB,*hostM,*thostM;
+        #endif
         int *seqM = (int *) malloc(sizeM*sizeof(int));
         int *A = (int *) malloc(sizeA*sizeof(int));
         int *B = (int *) malloc(sizeB*sizeof(int));
@@ -816,7 +813,7 @@ int main(int argc, char* argv[]) {
         // test for several value of N and d
         int Nmax = 1000000;
         if(argc == 2){
-            if(atoi(argv[1])<Nmax) Nmax = atoi(argv[1]);
+            if(atoi(argv[1])<Nmax && atoi(argv[1])> 1000 ) Nmax = atoi(argv[1]);
         }
         for(int N = 10; N<Nmax; N*=10){//10000000 max 
             for (int d = 2; d<=1024; d*=2){
@@ -932,11 +929,6 @@ int main(int argc, char* argv[]) {
         }
         fclose(f); 
     #endif
-
-    /**
-    * Part 3 : ideads     
-   
-    */
     
     //___________ Cleaning up ____________________
     #if QUESTION == 2||QUESTION==1
