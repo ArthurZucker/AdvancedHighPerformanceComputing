@@ -5,9 +5,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 from scipy import stats
 from matplotlib import rcParams
-sns.set_style('darkgrid')
-sns.set(font_scale=2)
-rcParams['figure.figsize'] = 11.7,8.27  
+sns.set_style('darkgrid', rc={"lines.linewidth": 2})
+sns.set(font_scale=3)
+
 # ______________________Question 1_____________________________
 
 df = pd.read_csv("results1.csv",usecols=["type","memory", "time"])
@@ -32,7 +32,7 @@ g=sns.catplot(
 (g.set_axis_labels("", "time")
 .set_titles("{col_name} {col_var}")
 .despine(left=True)
-) 
+)
 plt.title('Comparison of the execution time for merge sort w.r.t d')
 plt.savefig("question2.svg", format="svg", bbox_inches='tight')
 # ______________________Question 3_____________________________
@@ -89,7 +89,7 @@ df["N"] = df["N"].astype(str)
 sns.lineplot(
     data=df,
     x="d", y="time",
-    hue="N",palette=["b", "g", "r", "indigo", "k","cyan"]
+    hue="N"#,palette=["b", "g", "r", "indigo", "k","cyan"]
 )
 plt.title('Comparison of the execution time for mergeSmallBatch_k (using shared memory) w.r.t d')
 plt.savefig("question5.svg", format="svg", bbox_inches='tight')
