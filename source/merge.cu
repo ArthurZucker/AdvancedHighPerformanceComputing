@@ -380,9 +380,6 @@ __global__ void pathBig_k (const int *__restrict__ A,const int *__restrict__ B,i
     *     path[2* block indew] |  path[2* block indew +1] 
     *        ai               |       bi              
     */
-    
-        
-    
     if(threadIdx.x == 0){
         int i = blockDim.x*(blockIdx.x);
         int nb_blocks = gridDim.x;              // because last element is at path[2*(GridDim.x-1))] since 195 is last index of thread
@@ -485,7 +482,6 @@ void sort_array( int   *hD, int   *hsD,const int sizeD,const int tpb){
         for(int j=0;j<sizeD;j+=2*i){
             // iterate over the subarrays. 
             if(i>512){ // if the global size of array is > 1024
-                
                 pathBig_k   <<<nblocks,tpb>>>(&hD[j],&hD[j+i],path,i,i,2*i);
                 merged_Big_k<<<nblocks,tpb>>>(&hD[j],&hD[j+i],&hsD[j],path,2*i);
             }
