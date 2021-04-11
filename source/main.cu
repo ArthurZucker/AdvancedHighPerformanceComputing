@@ -4,15 +4,15 @@
 
 /**
  * @file main.cu
- * @author Arthur Zucker & Clément Apavou  
+ * @author Arthur Zucker & Clément Apavou
  * @date 12 Dec 2020
  * @brief Main file used to produce results for each questions
  *
  * In this porject, we tackled the MERGE SORT problem on GPU
- * using CUDA. We answered questions from a subject. If you want to 
- * see the original Merge sort articles, 
+ * using CUDA. We answered questions from a subject. If you want to
+ * see the original Merge sort articles,
  * @see https://www.researchgate.net/profile/Oded-Green/publication/254462662_GPU_merge_path_a_GPU_merging_algorithm/links/543eeaa00cf2e76f02244884/GPU-merge-path-a-GPU-merging-algorithm.pdf
- * @see https://arxiv.org/pdf/1406.2628.pdf 
+ * @see https://arxiv.org/pdf/1406.2628.pdf
  */
 
 
@@ -33,7 +33,7 @@ using namespace std;
 texture <int> texture_referenceA ;
 texture <int> texture_referenceB ;
 #define QUESTION 1  /**< Choose from {1,2,3,4,5} depending on the question */
-#define INFO 0      /**< Set to 1 if you need to see GPU infromations. */
+#define INFO 0      /**< Set to 1 if you need to see GPU informations. */
 
 
 int main(int argc, char* argv[]) {
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
     #endif
     #if QUESTION == 5
         int sizeM;
-        if (argc < 2) {sizeM = rand()%1024;} 
+        if (argc < 2) {sizeM = rand()%1024;}
         if (argc == 2) {sizeM=atoi(argv[1]);} // If no arguments are provided, set random sizes
         printf("|M| = %d\n",sizeM);
     #endif
@@ -96,9 +96,9 @@ int main(int argc, char* argv[]) {
 
     //___________________________ Question 1 _________________________________
     #if QUESTION == 1
-        FILE *f = fopen("../results/results1.csv", "w"); 
+        FILE *f = fopen("../results/results1.csv", "w");
         fprintf(f, "type,memory,time\n");
-        // Copy 
+        // Copy
         testCUDA(cudaMalloc((void **)&thostA,sizeA*sizeof(int)));
         testCUDA(cudaMalloc((void **)&thostB,sizeB*sizeof(int)));
         testCUDA(cudaMalloc((void **)&thostM,sizeM*sizeof(int)));
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
         // via mapped pinned memory or host->device transfers.
 
         testCUDA(cudaHostAlloc(&hostM,sizeM*sizeof(int),cudaHostAllocMapped)); // in order to do zero copy
- 
+
         //_______________ Sequential _________________
         printf("_______________ Sequential _________________\n");
         clock_t begin = clock();
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
         fprintf(f, "Texture,ZeroCpy,%f\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hostM,sizeM)<<endl;
         //____________________________________________
-        
+
         //_____________________________ Copy ______________________________________________________________
         printf("__________________________Copy________________________________\n");
         printf("_______________copy Normal ___________________\n");
@@ -242,12 +242,12 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaFreeHost(hostA));
         testCUDA(cudaFreeHost(hostB));
         testCUDA(cudaFreeHost(hostM));
-        fclose(f); 
+        fclose(f);
     #endif
 
     //___________________________ Question 2_________________________________
     #if QUESTION==2
-        FILE *f = fopen("../results/results2.csv", "w"); 
+        FILE *f = fopen("../results/results2.csv", "w");
         fprintf(f, "Kernel,type,memory,time\n");
         int *__restrict__ path;
         int nb_threads = 128;
@@ -351,7 +351,7 @@ int main(int argc, char* argv[]) {
         printf("elapsed time : %f ms\n",TimeVar);
         fprintf(f, "Merge,Naive,ZeroCpy,%f\n",TimeVar);
         cout<<"Check sorted : "<<is_sorted(hzM,sizeM)<<endl;
-        fclose(f); 
+        fclose(f);
     #endif
 
     //___________________________ Question 3_________________________________
@@ -365,12 +365,12 @@ int main(int argc, char* argv[]) {
         //int nb_blocks = (sizeM+nb_threads-1)/nb_threads;
         printf("__________________ sort M __________________\n");
         int threads_per_blocks = 128;
-        FILE *f = fopen("../results/results3.csv", "w"); 
+        FILE *f = fopen("../results/results3.csv", "w");
         fprintf(f, "d,time\n");
         for(int d=2;d<262144*2*2;d*=4){
             testCUDA(cudaMalloc((void **)&hsD,d*sizeof(int)));
             testCUDA(cudaMalloc((void **)&hD ,d*sizeof(int)));
-            
+
             //code to launch on a size != than a power of 2
             if(d != 0 && (d & (d-1)) == 0){
                 //printf("|M| is a power of 2\n");
@@ -390,8 +390,8 @@ int main(int argc, char* argv[]) {
                 padding = power-d;
                 d = power;
             }
-            
-            // printf("Assigning M\n");  
+
+            // printf("Assigning M\n");
             testCUDA(cudaMemcpy(hD, D, d*sizeof(int), cudaMemcpyHostToDevice));
             testCUDA(cudaEventRecord(start,0));
             sort_array(hD,hsD,d,threads_per_blocks);
@@ -422,26 +422,26 @@ int main(int argc, char* argv[]) {
             free(D);
             free(sD);
         }
-        fclose(f); 
+        fclose(f);
     #endif
-        
+
     //___________________________ Question 4_________________________________
     #if QUESTION==4
-        FILE *f = fopen("../results/results4.csv", "w"); 
+        FILE *f = fopen("../results/results4.csv", "w");
         fprintf(f, "type,memory,time\n");
         // N arrays containing Ai and Bi such as |Ai| + |Bi| = d
         // N arrays of size d
         int N = 10000; // max 1000000
-        int d = 500; 
+        int d = 500;
         if (argc > 2) {
             N = atoi(argv[1]);
             d = atoi(argv[2]);
-            if(d>1024) d=1024; 
+            if(d>1024) d=1024;
         } // If no arguments are provided, set random sizes
         printf("N = %d | d = %d\n",N,d);
-        
-        
-        // ________________________________________Zero Copy______________________________________________ 
+
+
+        // ________________________________________Zero Copy______________________________________________
 
         printf("_______________________________Zero copy____________________________________\n");
         int* host_all_M;
@@ -449,17 +449,17 @@ int main(int argc, char* argv[]) {
         int* host_all_size_A;
         int* host_all_size_B;
 
-        // allocation on the device for save all size of Ai and Bi 
-        // we choose a 1D representation,  we stocked Ai and Bi in one table M : M = (A1|B1|...|AN|BN) 
+        // allocation on the device for save all size of Ai and Bi
+        // we choose a 1D representation,  we stocked Ai and Bi in one table M : M = (A1|B1|...|AN|BN)
         testCUDA(cudaHostAlloc(&host_all_size_A,N*sizeof(int),cudaHostAllocMapped));
         testCUDA(cudaHostAlloc(&host_all_size_B,N*sizeof(int),cudaHostAllocMapped));
 
-        // Initialisation of size Ai and Bi such as |Ai| + |Bi| = d 
+        // Initialisation of size Ai and Bi such as |Ai| + |Bi| = d
         int size_all_A=0;
         int size_all_B=0;
         int sizeA;
         int sizeB;
-        for(int i = 0;i<N;i++){ 
+        for(int i = 0;i<N;i++){
             sizeA = rand()%d+1;
             sizeB = (d-sizeA);
             host_all_size_A[i] = sizeA;
@@ -468,12 +468,12 @@ int main(int argc, char* argv[]) {
             size_all_B +=sizeB;
         }
 
-        // we stocked Ai and Bi in one table M : M = (A1|B1|...|AN|BN) 
+        // we stocked Ai and Bi in one table M : M = (A1|B1|...|AN|BN)
         // allocation on device for M and STM of size N*d (N arrays of size d)
-        // M will contains N arrays of Ai and Bi not sorted  
-        // STM (Sorted M) will contains Mi sorted i.e Ai and Bi merge and sort 
-        testCUDA(cudaHostAlloc(&host_all_STM,N*d*sizeof(int),cudaHostAllocMapped));    
-        testCUDA(cudaHostAlloc(&host_all_M,N*d*sizeof(int),cudaHostAllocMapped));  
+        // M will contains N arrays of Ai and Bi not sorted
+        // STM (Sorted M) will contains Mi sorted i.e Ai and Bi merge and sort
+        testCUDA(cudaHostAlloc(&host_all_STM,N*d*sizeof(int),cudaHostAllocMapped));
+        testCUDA(cudaHostAlloc(&host_all_M,N*d*sizeof(int),cudaHostAllocMapped));
 
         // Start initialisation of the first arrays A0 and B0
         if(host_all_size_A[0]!=0){
@@ -488,18 +488,18 @@ int main(int argc, char* argv[]) {
                 host_all_M[j]=host_all_M[j-1]+rand()%20+1;
             }
         }
-            
-        // Initialisation of all arrays 
+
+        // Initialisation of all arrays
         int tmp_A=host_all_size_A[0];
         int tmp_B=host_all_size_B[0];
-        for(int i = 1;i<N;i++){ 
+        for(int i = 1;i<N;i++){
             if(host_all_size_A[i]!=0){
                 host_all_M[tmp_A+tmp_B]=rand()%20+1;
                 for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+host_all_size_A[i];j++){
                     host_all_M[j]=host_all_M[j-1]+rand()%20+1;
                 }
                     tmp_A+= host_all_size_A[i];
-            
+
             }
             if(host_all_size_B[i]!=0){
                 host_all_M[tmp_A+tmp_B]=rand()%20+1;
@@ -509,7 +509,7 @@ int main(int argc, char* argv[]) {
                 tmp_B+= host_all_size_B[i];
             }
         }
-        
+
         printf("_________________ LDG_____________________\n");
 
         int numBlocks = N; //big number
@@ -596,7 +596,7 @@ int main(int argc, char* argv[]) {
             printf("There is a table not sorted !\n");
         }
 
-        // ________________________________________Copy______________________________________________ 
+        // ________________________________________Copy______________________________________________
 
         printf("__________________________________Copy_______________________________________\n");
 
@@ -616,7 +616,7 @@ int main(int argc, char* argv[]) {
         // Initialisation size
         size_all_A=0;
         size_all_B=0;
-        for(int i = 0;i<N;i++){ 
+        for(int i = 0;i<N;i++){
             sizeA = rand()%d+1;
             sizeB = (d-sizeA);
             all_size_A[i] = sizeA;
@@ -628,7 +628,7 @@ int main(int argc, char* argv[]) {
         // copy of all size on device
         testCUDA(cudaMemcpy(h_all_size_A, all_size_A, N*sizeof(int), cudaMemcpyHostToDevice));
         testCUDA(cudaMemcpy(h_all_size_B, all_size_B, N*sizeof(int), cudaMemcpyHostToDevice));
-        
+
         // allocation on device of M and STM
         testCUDA(cudaMalloc((void **)&h_all_M,N*d*sizeof(int)));
         testCUDA(cudaMalloc((void **)&h_all_STM,N*d*sizeof(int)));
@@ -649,15 +649,15 @@ int main(int argc, char* argv[]) {
         tmp_A=all_size_A[0];
         tmp_B=all_size_B[0];
 
-        // Initialisation of all arrays 
-        for(int i = 1;i<N;i++){ 
+        // Initialisation of all arrays
+        for(int i = 1;i<N;i++){
             if(all_size_A[i]!=0){
                 all_M[tmp_A+tmp_B]=rand()%20+1;
                 for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+all_size_A[i];j++){
                     all_M[j]=all_M[j-1]+rand()%20+1;
                 }
                 tmp_A+= all_size_A[i];
-        
+
             }
             if(all_size_B[i]!=0){
                 all_M[tmp_A+tmp_B]=rand()%20+1;
@@ -759,7 +759,7 @@ int main(int argc, char* argv[]) {
             printf("There is a table not sorted !\n");
         }
 
-        // test on quicksort sequential to compare 
+        // test on quicksort sequential to compare
         printf("______________________________Quicksort sequential___________________________\n");
 
         clock_t begin = clock();
@@ -786,7 +786,7 @@ int main(int argc, char* argv[]) {
         }
 
         // ______________________Clean Question 4_____________________________
-        // clean copy 
+        // clean copy
         free(all_M);
         free(all_STM);
         free(all_size_A);
@@ -801,21 +801,21 @@ int main(int argc, char* argv[]) {
         testCUDA(cudaFreeHost(host_all_STM));
         testCUDA(cudaFreeHost(host_all_size_A));
         testCUDA(cudaFreeHost(host_all_size_B));
-        fclose(f); 
+        fclose(f);
     #endif
 
     //___________________________ Question 5__________________________________
-   
+
     #if QUESTION == 5
         // We chose to use copy because it's faster than zero copy
-        FILE *f = fopen("../results/results5.csv", "w"); 
+        FILE *f = fopen("../results/results5.csv", "w");
         fprintf(f, "N,d,time\n");
         // test for several value of N and d
         int Nmax = 1000000;
         if(argc == 2){
             if(atoi(argv[1])<Nmax && atoi(argv[1])> 1000 ) Nmax = atoi(argv[1]);
         }
-        for(int N = 10; N<Nmax; N*=10){//10000000 max 
+        for(int N = 10; N<Nmax; N*=10){//10000000 max
             for (int d = 2; d<=1024; d*=2){
                 int* all_M = (int *) malloc(N*d*sizeof(int));
                 int* all_STM = (int *) malloc(N*d*sizeof(int));
@@ -835,7 +835,7 @@ int main(int argc, char* argv[]) {
                 int size_all_B=0;
                 int sizeA;
                 int sizeB;
-                for(int i = 0;i<N;i++){ 
+                for(int i = 0;i<N;i++){
                     sizeA = rand()%d+1;
                     sizeB = (d-sizeA);
                     all_size_A[i] = sizeA;
@@ -847,7 +847,7 @@ int main(int argc, char* argv[]) {
                 // copy of all size on device
                 testCUDA(cudaMemcpy(h_all_size_A, all_size_A, N*sizeof(int), cudaMemcpyHostToDevice));
                 testCUDA(cudaMemcpy(h_all_size_B, all_size_B, N*sizeof(int), cudaMemcpyHostToDevice));
-                
+
                 // allocation on device of M and STM
                 testCUDA(cudaMalloc((void **)&h_all_M,N*d*sizeof(int)));
                 testCUDA(cudaMalloc((void **)&h_all_STM,N*d*sizeof(int)));
@@ -868,15 +868,15 @@ int main(int argc, char* argv[]) {
                 int tmp_A=all_size_A[0];
                 int tmp_B=all_size_B[0];
 
-                // Initialisation of all arrays 
-                for(int i = 1;i<N;i++){ 
+                // Initialisation of all arrays
+                for(int i = 1;i<N;i++){
                     if(all_size_A[i]!=0){
                         all_M[tmp_A+tmp_B]=rand()%20+1;
                         for(int j = tmp_A+tmp_B+1;j<tmp_A+tmp_B+all_size_A[i];j++){
                             all_M[j]=all_M[j-1]+rand()%20+1;
                         }
                         tmp_A+= all_size_A[i];
-                
+
                     }
                     if(all_size_B[i]!=0){
                         all_M[tmp_A+tmp_B]=rand()%20+1;
@@ -927,15 +927,15 @@ int main(int argc, char* argv[]) {
                 testCUDA(cudaFree(h_all_size_B));
             }
         }
-        fclose(f); 
+        fclose(f);
     #endif
-    
+
     //___________ Cleaning up ____________________
     #if QUESTION == 2||QUESTION==1
     free(A);
     free(B);
     free(M);
-    #endif 
+    #endif
 	testCUDA(cudaEventDestroy(start));
     testCUDA(cudaEventDestroy(stop));
     cudaDeviceReset();
