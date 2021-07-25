@@ -1,6 +1,8 @@
-# HPCA
+# Batch merge and merge sort using CUDA programming
 GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou` (MAIN)
-
+The different questions we answered can be found under the *Projet.pdf* file. 
+We used different types of memories to compare our implementation, and tested most of our code on our unviversity's GPU.
+Our results can be found in the *result* folder. 
 # Structure
 ```
 ├── results                 # Result files
@@ -19,4 +21,4 @@ GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou` (MAIN)
 └── README.md
 ```
 # Utilisation
-On the line 35 of the main, you have to choose from {1,2,3,4,5} depending on the question that you want to launch.
+On line 35 of the main, you have to choose from {1,2,3,4,5} depending on the question that you want to launch.
