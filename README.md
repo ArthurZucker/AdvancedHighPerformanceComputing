@@ -1,5 +1,5 @@
 # Batch merge and merge sort using CUDA programming
-GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou` (MAIN)
+GPU project on CUDA, implemented by  `Arthur Zucker` & `Clément Apavou` (MAIN5). This was the final project of our 5th year's Advanced High Performance Computing class.  
 The different questions we answered can be found under the *Projet.pdf* file. 
 We used different types of memories to compare our implementation, and tested most of our code on our unviversity's GPU.
 Our results can be found in the *result* folder. 
